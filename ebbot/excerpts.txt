@@ -1,0 +1,8 @@
+[{"id":0, "title":"Propaganda", "author":"Edward Bernays", "field4":"", "field5":"", "content":"Text1"},
+{"id":1, "title":"Propaganda", "author":"Edward Bernays", "field4":"", "field5":"", "content":"Text2"},
+{"id":2, "title":"Propaganda", "author":"Edward Bernays", "field4":"", "field5":"", "content":"Text3"},
+{"id":3, "title":"Propaganda", "author":"Edward Bernays", "field4":"", "field5":"", "content":"Text4"},
+{"id":4, "title":"Propaganda", "author":"Edward Bernays", "field4":"", "field5":"", "content":"Text5"},
+{"id":5, "title":"Propaganda", "author":"Edward Bernays", "field4":"", "field5":"", "content":"Text6"},
+{"id":6, "title":"Propaganda", "author":"Edward Bernays", "field4":"", "field5":"", "content":"Text7"}]
+
