@@ -6,9 +6,9 @@
   (current-buffer)
   (copy-region-as-kill  (region-beginning) (region-end))
   (set-buffer "destination.txt")
-  (insert  "\"")
+ 
   (yank)
-  (insert "\"\n\n")
+  (insert "\n")
   (save-buffer 64))
  
   
