@@ -9,6 +9,7 @@
 	     (srfi srfi-9)  ;;records
 	     (web response)
 	     (web request)
+	  ;   (hashing fixnums)
 	     (web uri)
 	     (ice-9 rdelim)
 	     (ice-9 i18n)   ;; internationalization
@@ -21,76 +22,71 @@
 	     (ice-9 textual-ports)
 	     )
 
-;;(define counter 0)
-;;(define max-excerpts 0)
+(load "/home/mbc/projects/bab/bab/twitter.scm")
 (define working-dir "")
 (define tweet-length 0)
 
-(define-record-type <idcounter>
-  (make-idcounter last-posted-id )
-  idcounter?
-  (last-posted-id idcounter-last-posted-id set-idcounter-last-posted-id!)
-  )
+;; (define-record-type <idcounter>
+;;   (make-idcounter last-posted-id )
+;;   idcounter?
+;;   (last-posted-id idcounter-last-posted-id set-idcounter-last-posted-id!)
+;;   )
 
 
-(define-record-type <excerpt>
-  (make-excerpt id title author field4 field5 content)
-  excerpt?
-  (id    excerpt-id set-excerpt-id!)
-  (title excerpt-title set-excerpt-title!)
-  (author excerpt-author set-excerpt-author!)
-  (field4 excerpt-field4)
-  (field5 excerpt-field5)
-  (content excerpt-content set-excerpt-content!)
-  )
-
+;; (define-record-type <excerpt>
+;;   (make-excerpt id image content)
+;;   excerpt?
+;;   (id    excerpt-id set-excerpt-id!)
+;;   (image excerpt-image)
+;;   (content excerpt-content set-excerpt-content!)
+;;   )
 
 
 (define (get-counter)
   ;;counter is the last tweeted id
   ;;start with (+ counter 1) for this session
   (let* (
-	 (p  (open-input-file (string-append working-dir "last-posted.json")))
+	 (p  (open-input-file (string-append working-dir "/last-posted.json")))
 	 (a (json-string->scm (get-string-all p)))
 	 (dummy (close-port p))
 	 (b (assoc-ref a "last-posted-id")))
     b))
 
 (define (set-counter x)
-(let* ((p  (open-output-file (string-append working-dir "last-posted.json")))
+(let* ((p  (open-output-file (string-append working-dir "/last-posted.json")))
 	 (a (scm->json-string `(("last-posted-id" . ,x))))
 	 (dummy (put-string p a)))
   (close-port p)))
 
   
 (define (get-all-excerpts-alist)
-  (let* ((p  (open-input-file (string-append working-dir "db.json")))
+  (let* ((p  (open-input-file (string-append working-dir "/db.json")))
 	 (a (vector->list (json-string->scm (get-string-all p)))))	
      a))
 
 
-(define (get-multiple-tweets s l lst)
-  ;;s: the string
-  ;;l: length of tweet (240 for twitter)
-  ;;lst: initially '()
-  (if (< (string-length s) l)
-      (begin
-	(set! lst (cons s lst))
-	(reverse lst))
-      (let* ((end (string-rindex s #\space 0 241))
-	     (dummy (set! lst (cons (substring s 0 end) lst)))
-	     (rest (substring s (+ end 1))))
-	(get-multiple-tweets rest l lst))))
+;; (define (get-multiple-tweets s l lst)
+;;   ;;s: the string
+;;   ;;l: length of tweet (240 for twitter)
+;;   ;;lst: initially '()
+;;   (if (< (string-length s) l)
+;;       (begin
+;; 	(set! lst (cons s lst))
+;; 	(reverse lst))
+;;       (let* ((end (string-rindex s #\space 0 241))
+;; 	     (dummy (set! lst (cons (substring s 0 end) lst)))
+;; 	     (rest (substring s (+ end 1))))
+;; 	(get-multiple-tweets rest l lst))))
 
 
-(define (get-tweets a)
-  ;;a: an entity
-  (let* ((excerpt (assoc-ref a "content"))
-	 (nchar (string-length excerpt))
-	 (ntweets (ceiling (/ nchar 240)))
-	 (tweets (if (> ntweets 1) (get-multiple-tweets excerpt tweet-length '()) `(,excerpt))))
-   tweets
-  ))
+;; (define (get-tweets a)
+;;   ;;a: an entity
+;;   (let* ((excerpt (assoc-ref a "content"))
+;; 	 (nchar (string-length excerpt))
+;; 	 (ntweets (ceiling (/ nchar 240)))
+;; 	 (tweets (if (> ntweets 1) (get-multiple-tweets excerpt tweet-length '()) `(,excerpt))))
+;;    tweets
+;;   ))
 
 
 (define (find-by-id lst id)
@@ -113,8 +109,8 @@
 	 (all-excerpts (get-all-excerpts-alist))
 	 (max-id (assoc-ref (car all-excerpts) "id"))
 	 (new-counter (if (= counter max-id) 0 (+ counter 1)))
-	 (entity (find-by-id all-excerpts new-counter))
-	 (tweets (get-tweets entity))	 
+	 (entity (find-by-id all-excerpts new-counter))	 
+	 (tweets (chunk-a-tweet (assoc-ref entity "content") 280))	 
 	 (dummy (set-counter new-counter))
 	 (stop-time (current-time time-monotonic))
 	 (elapsed-time (ceiling (/ (time-second (time-difference stop-time start-time)) 60)))
