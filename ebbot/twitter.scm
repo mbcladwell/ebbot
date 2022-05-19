@@ -21,21 +21,14 @@
  #:use-module  (json)
  #:use-module  (oauth oauth1)
  #:use-module  (oauth oauth2)
-; #:use-module  (oauth oauth2 request)
-; #:use-module  (oauth oauth2 response)
  #:use-module  (oauth utils)
  #:use-module  (oauth request)
-; #:use-module  (oauth oauth1 client)
-; #:use-module  (oauth oauth1 utils)
-; #:use-module  (oauth oauth1 credentials)
-; #:use-module  (oauth oauth1 signature)	     
  #:use-module  (rnrs bytevectors)
  #:use-module  (ice-9 textual-ports)
  #:export (oauth1-post-tweet-recurse
 	   chunk-a-tweet
+	   get-nonce
 	   ))
-
-(add-to-load-path "/gnu/store/lxbvzmdcv82ik37z4np3c45p11iic7qx-guile-json-4.5.2/share/guile/site/3.0")
 
 (define working-dir "")
 

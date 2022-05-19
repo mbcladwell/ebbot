@@ -9,12 +9,14 @@ rm ./hall.scm
 rm ./*.go
 rm ./ebbot/*.go
 rm ./ebbot-0.1.tar.gz
+rm ./scripts/*.*
 hall init --convert --author "mbc" ebbot --execute
 hall scan -x
 hall build -x
 cp /home/mbc/syncd/tobedeleted/ebbot/guix.scm .
 cp /home/mbc/syncd/tobedeleted/ebbot/hall.scm .
 cp /home/mbc/syncd/tobedeleted/ebbot/Makefile.am .
+cp /home/mbc/syncd/tobedeleted/ebbot/ebbot.sh ./scripts
 autoreconf -vif && ./configure && make
 
 make dist
