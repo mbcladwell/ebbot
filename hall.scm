@@ -2,7 +2,7 @@
   (name "ebbot")
   (prefix "")
   (version "0.1")
-  (author "mbcladwell")
+  (author "mbc")
   (copyright (2022))
   (synopsis "")
   (description "")
@@ -11,7 +11,7 @@
   (dependencies `())
   (skip ())
   (files (libraries
-           ((scheme-file "ebbot") (directory "ebbot" ())))
+           ((scheme-file "ebbot") (directory "ebbot" (scheme-file "twitter"))))
          (tests ((directory "tests" ())))
          (programs ((directory "scripts" ())))
          (documentation
