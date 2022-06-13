@@ -259,6 +259,6 @@
 
 (define (get-image directive working-dir)
   (cond ((equal? directive "none") #f)
-	((equal? directive "") (get-random-image (string-append working-dir "/images/")))
+	((equal? directive "random") (get-random-image (string-append working-dir "/images/")))
 	(else directive)))
   

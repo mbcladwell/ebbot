@@ -85,6 +85,7 @@
 	 )
    (oauth1-post-tweet-recurse tweets "" media-id 0)    
     ;; (pretty-print (string-append "Elapsed time: " (number->string  elapsed-time) " minutes." ))
-  ;; (pretty-print (string-append "new-counter: " (number->string new-counter) " media-directive: "  media-directive  " image-file: " (if image-file image-file "f")))
+    ;;   (pretty-print (string-append "new-counter: " (number->string new-counter) " media-directive: "  media-directive  " image-file: " (if image-file (string-append working-dir "/images/" image-file) "f")))
+;    (pretty-print image-file)
    ;; #f)
     ))
