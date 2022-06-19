@@ -17,11 +17,13 @@ cp /home/mbc/syncd/tobedeleted/ebbot/guix.scm .
 cp /home/mbc/syncd/tobedeleted/ebbot/hall.scm .
 cp /home/mbc/syncd/tobedeleted/ebbot/Makefile.am .
 cp /home/mbc/syncd/tobedeleted/ebbot/ebbot.sh ./scripts
+cp /home/mbc/syncd/tobedeleted/ebbot/format.sh ./scripts
 autoreconf -vif && ./configure && make
 
 make dist
 
-
+guix hash ./ebbot-0.1.tar.gz
+## cp /home/mbc/syncd/tobedeleted/ebbot/guix.scm  /home/mbc/projects/labsolns/labsolns/ebbot.scm
 
 ##scp -i /home/mbc/labsolns.pem ./shinyln-0.1.tar.gz admin@ec2-18-189-31-114.us-east-2.compute.amazonaws.com:.
 ##scp -i /home/mbc/labsolns.pem /home/mbc/syncd/tobedeleted/shinyln/guix.scm admin@ec2-18-189-31-114.us-east-2.compute.amazonaws.com:.

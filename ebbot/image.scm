@@ -252,13 +252,19 @@
 `(("media-id" . ,returned-media-id)("file-name" . ,img-file)("expires" . ,expires)) ))
 
 
+
+
 (define (get-random-image dir)
-  ;;directory is (string-append working-dir "/images")
+  ;;directory is (string-append working-dir "/random")
   (let* ((all-files (list->vector (cddr (scandir dir)) )))
    (vector-ref all-files (random (vector-length all-files) (seed->random-state (number->string (time-nanosecond (current-time)))))) ) )
 
 (define (get-image directive working-dir)
   (cond ((equal? directive "none") #f)
-	((equal? directive "random") (get-random-image (string-append working-dir "/images/")))
-	(else directive)))
+    ((equal? directive "random")
+       (string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/"))) )
+     ((equal? directive "specific") (string-append working-dir "/specific/" directive))
+     ))
+  
+
   
