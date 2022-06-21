@@ -1,8 +1,8 @@
-#!/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile \
--e (ebbot) -s
-!#
+;#!/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile \
+;-e (ebbot) -s
+;!#
 
-(add-to-load-path ".")
+;(add-to-load-path ".")
 
 (define-module (ebbot) 
 #:use-module (web client)
@@ -22,12 +22,14 @@
 #:use-module (json)
 #:use-module (ice-9 textual-ports)
 #:use-module (ebbot twitter)	 
-#:use-module (ebbot image)	 
-#:export (main)
+#:use-module (ebbot image)
+#:use-module (ebbot env)
+#:export (main
+	  *working-dir*)
 )
 
 
-(define working-dir "")
+(define *working-dir* "")
 (define tweet-length 0)
 
 
@@ -35,21 +37,21 @@
   ;;counter is the last tweeted id
   ;;start with (+ counter 1) for this session
   (let* (
-	 (p  (open-input-file (string-append working-dir "/last-posted.json")))
+	 (p  (open-input-file (string-append *working-dir* "/last-posted.json")))
 	 (a (json-string->scm (get-string-all p)))
 	 (dummy (close-port p))
 	 (b (assoc-ref a "last-posted-id")))
     b))
 
 (define (set-counter x)
-(let* ((p  (open-output-file (string-append working-dir "/last-posted.json")))
+(let* ((p  (open-output-file (string-append *working-dir* "/last-posted.json")))
 	 (a (scm->json-string `(("last-posted-id" . ,x))))
 	 (dummy (put-string p a)))
   (close-port p)))
 
   
 (define (get-all-excerpts-alist)
-  (let* ((p  (open-input-file (string-append working-dir "/db.json")))
+  (let* ((p  (open-input-file (string-append *working-dir* "/db.json")))
 	 (a (vector->list (json-string->scm (get-string-all p)))))	
      a))
 
@@ -68,7 +70,8 @@
 (define (main args)
   ;; args: '( "working-dir" tweet-length )
   (let* ((start-time (current-time time-monotonic))
-	 (dummy (set! working-dir (cadr args)))
+	 (dummy (pretty-print (cadr args)))
+	 (dummy (set! *working-dir* (cadr args)))
 	 (dummy (set! tweet-length (string->number (caddr args))))	 
 	 (counter (get-counter))
 	 (all-excerpts (get-all-excerpts-alist))
@@ -77,7 +80,7 @@
 	 (entity (find-by-id all-excerpts new-counter))	 
 	 (tweets (chunk-a-tweet (assoc-ref entity "content") 260))
 	 (media-directive (assoc-ref entity "image"))
-	 (image-file (get-image media-directive working-dir))
+	 (image-file (get-image media-directive *working-dir*))
 	;; (media-id (if image-file (assoc-ref (upload-image (string-append working-dir "/images/" image-file) 2000) "media-id") ""))
 	  (media-id (if image-file (assoc-ref (upload-image image-file 2000) "media-id") ""))
 	 (dummy (set-counter new-counter))

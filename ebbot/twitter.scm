@@ -29,6 +29,7 @@
  #:use-module (oauth oauth1 signature)
  #:use-module (rnrs bytevectors)
  #:use-module (ice-9 textual-ports)
+ #:use-module (ebbot env)
  #:export (oauth2-post-tweet
 	   oauth1-post-tweet
 	   oauth2-post-tweet-recurse
@@ -36,21 +37,14 @@
 	   chunk-a-tweet
 	   get-nonce))
 
-;; (define *oauth-consumer-key* #f)
-;; (define *oauth-consumer-secret* #f)
-;; (define *bearer-token* #f)
-;; (define *oauth-access-token* #f)
-;; (define *oauth-token-secret* #f)
-;; (define *client-id* #f)
-;; (define *client-secret* #f)
 
-(define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
-(define *oauth-consumer-secret* "if9ZzqTzYnD2hQbDWYqr4vU96Kbxa4J4LnU96FNybGSEXT0fmp")
-(define *bearer-token* "AAAAAAAAAAAAAAAAAAAAAENdbwEAAAAAK8xNPdkooUQG8UW2skHuRhgnaDo%3D6vkZYbDATcAgTBflgdz1Ng8MPT4qbTV12gh3RUjpt7YAxZj8pM")  ;;this does not change
-(define *oauth-access-token* "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH")
-(define *oauth-token-secret* "0Dxm5RXqRUR880NpXCLVekAfU50dcAbTvso6nlzHSQALy")
-(define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
-(define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
+;; (define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
+;; (define *oauth-consumer-secret* "if9ZzqTzYnD2hQbDWYqr4vU96Kbxa4J4LnU96FNybGSEXT0fmp")
+;; (define *bearer-token* "AAAAAAAAAAAAAAAAAAAAAENdbwEAAAAAK8xNPdkooUQG8UW2skHuRhgnaDo%3D6vkZYbDATcAgTBflgdz1Ng8MPT4qbTV12gh3RUjpt7YAxZj8pM")  ;;this does not change
+;; (define *oauth-access-token* "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH")
+;; (define *oauth-token-secret* "0Dxm5RXqRUR880NpXCLVekAfU50dcAbTvso6nlzHSQALy")
+;; (define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
+;; (define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
 
 (define nonce-chars (list->vector (string->list "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789")))
 
