@@ -1,8 +1,3 @@
-;#!/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile \
-;-e (ebbot) -s
-;!#
-
-;(add-to-load-path ".")
 
 (define-module (ebbot) 
 #:use-module (web client)
@@ -23,14 +18,33 @@
 #:use-module (ice-9 textual-ports)
 #:use-module (ebbot twitter)	 
 #:use-module (ebbot image)
-#:use-module (ebbot env)
+#:use-module (gcrypt base64)
+#:use-module (rnrs bytevectors)
+
+;;#:use-module (ebbot env)
 #:export (main
-	  *working-dir*)
-)
+	  *working-dir*
+	  ;;  *oauth-consumer-key*
+	  ;; *oauth-consumer-secret*
+	  ;; *bearer-token*
+	  ;; *oauth-access-token*
+	  ;; *oauth-token-secret*
+	  ;; *client-id*
+	  ;; *client-secret*
+))
 
 
 (define *working-dir* "")
 (define tweet-length 0)
+;; (define *oauth-consumer-key* #f)
+;; (define *oauth-consumer-secret* #f)
+;; (define *bearer-token* #f)
+;; (define *oauth-access-token* #f)
+;; (define *oauth-token-secret* #f)
+;; (define *client-id* #f)
+;; (define *client-secret* #f)
+
+
 
 
 (define (get-counter)
@@ -66,13 +80,24 @@
 	  (find-by-id (cdr lst) id))))
 
 
-
 (define (main args)
   ;; args: '( "working-dir" tweet-length )
   (let* ((start-time (current-time time-monotonic))
 	 (dummy (pretty-print (cadr args)))
 	 (dummy (set! *working-dir* (cadr args)))
-	 (dummy (set! tweet-length (string->number (caddr args))))	 
+	 (dummy (set! tweet-length (string->number (caddr args))))
+	 ;; (p  (open-input-file (string-append *working-dir* "/env.txt")))
+ 	 ;; (a (get-string-all p))
+	 ;; (b (base64-decode a))
+	 ;; (varlst (json-string->scm (utf8->string b)))
+	 ;; (dummy   (begin
+	 ;; 	    (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
+	 ;; 	    (set! *oauth-consumer-secret* (assoc-ref varlst "oauth-consumer-secret"))
+	 ;; 	    (set! *bearer-token* (assoc-ref varlst "bearer-token"))
+	 ;; 	    (set! *oauth-access-token* (assoc-ref varlst "oauth-access-token"))
+	 ;; 	    (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
+	 ;; 	    (set! *client-id* (assoc-ref varlst "client-id"))
+	 ;; 	    (set! *client-secret* (assoc-ref varlst "client-secret"))))
 	 (counter (get-counter))
 	 (all-excerpts (get-all-excerpts-alist))
 	 (max-id (assoc-ref (car all-excerpts) "id"))
@@ -91,5 +116,6 @@
     ;; (pretty-print (string-append "Elapsed time: " (number->string  elapsed-time) " minutes." ))
     ;;   (pretty-print (string-append "new-counter: " (number->string new-counter) " media-directive: "  media-directive  " image-file: " (if image-file (string-append working-dir "/images/" image-file) "f")))
 ;    (pretty-print image-file)
-   ;; #f)
-    ))
+    #f)
+    )
+

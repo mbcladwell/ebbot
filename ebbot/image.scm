@@ -26,17 +26,18 @@
 #:use-module (ice-9 textual-ports)
 #:use-module (gcrypt base64)
 #:use-module (ebbot twitter)
-#:use-module (ebbot env)
+;#:use-module (ebbot)
+
 #:export (upload-image
 	  get-image))
 
-;; (define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
-;; (define *oauth-consumer-secret* "if9ZzqTzYnD2hQbDWYqr4vU96Kbxa4J4LnU96FNybGSEXT0fmp")
-;; (define *bearer-token* "AAAAAAAAAAAAAAAAAAAAAENdbwEAAAAAK8xNPdkooUQG8UW2skHuRhgnaDo%3D6vkZYbDATcAgTBflgdz1Ng8MPT4qbTV12gh3RUjpt7YAxZj8pM")  ;;this does not change
-;; (define *oauth-access-token* "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH")
-;; (define *oauth-token-secret* "0Dxm5RXqRUR880NpXCLVekAfU50dcAbTvso6nlzHSQALy")
-;; (define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
-;; (define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
+(define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
+(define *oauth-consumer-secret* "if9ZzqTzYnD2hQbDWYqr4vU96Kbxa4J4LnU96FNybGSEXT0fmp")
+(define *bearer-token* "AAAAAAAAAAAAAAAAAAAAAENdbwEAAAAAK8xNPdkooUQG8UW2skHuRhgnaDo%3D6vkZYbDATcAgTBflgdz1Ng8MPT4qbTV12gh3RUjpt7YAxZj8pM")  ;;this does not change
+(define *oauth-access-token* "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH")
+(define *oauth-token-secret* "0Dxm5RXqRUR880NpXCLVekAfU50dcAbTvso6nlzHSQALy")
+(define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
+(define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
 
 
 (define (oauth1-upload-media-finalize media-id )
@@ -261,11 +262,14 @@
    (vector-ref all-files (random (vector-length all-files) (seed->random-state (number->string (time-nanosecond (current-time)))))) ) )
 
 (define (get-image directive working-dir)
-  (cond ((equal? directive "none") #f)
-    ((equal? directive "random")
-       (string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/"))) )
-     ((equal? directive "specific") (string-append working-dir "/specific/" directive))
+  (cond ((string=? directive "none") (#f))
+	((string=? directive "random")(string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/"))) )
+	
+	(else (string-append working-dir "/specific/" directive))
      ))
   
 
-  
+;; (define (get-image directive working-dir)
+;;   (if (equal? directive "none") #f
+;;       (if (equal? directive "random") (string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/")))
+;; 	 (string-append working-dir "/specific/" directive) )))  

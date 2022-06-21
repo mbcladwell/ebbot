@@ -1,68 +1,35 @@
-#!/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile \
--e main -s
-!#
-
-(add-to-load-path "/gnu/store/lxbvzmdcv82ik37z4np3c45p11iic7qx-guile-json-4.5.2/share/guile/site/3.0")
-(use-modules (web client)
-	     (srfi srfi-19) ;; date time
-	     (srfi srfi-1)  ;;list searching; delete-duplicates in list 
-	     (srfi srfi-9)  ;;records
-	     (web response)
-	     (web request)
-	     (web uri)
-	     (ice-9 rdelim)
-	     (ice-9 i18n)   ;; internationalization
-	     (ice-9 popen)
-	     (ice-9 regex) ;;list-matches
-	     (ice-9 receive)	     
-	     (ice-9 string-fun)  ;;string-replace-substring
-	     (ice-9 pretty-print)
-	     (json)
-	     (ice-9 textual-ports)
-	     )
+(define-module (ebbot format) 
+  #:use-module (web client)
+  #:use-module (srfi srfi-19) ;; date time
+  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
+  #:use-module (srfi srfi-9)  ;;records
+  #:use-module (web response)
+  #:use-module (web request)
+  #:use-module (web uri)
+  #:use-module (ice-9 rdelim)
+  #:use-module (ice-9 i18n)   ;; internationalization
+  #:use-module (ice-9 popen)
+  #:use-module (ice-9 regex) ;;list-matches
+  #:use-module (ice-9 receive)	     
+  #:use-module (ice-9 string-fun)  ;;string-replace-substring
+  #:use-module (ice-9 pretty-print)
+  #:use-module (json)
+  #:use-module (ice-9 textual-ports))
 
 ;;input: a text file with quotes that are delimitted by <CR><LF>
 ;;output: a json that is appropriate for consing to the json database. The quotes will be annotated with source, and image if available.
 
 ;; database fields: id, content, image
-;; meta fields: author, title, appendage;  appendage is what will be appended to the quote e.g. "--Edward Bernays (Propaganda, 1928)"
 
-;;four files:
 (define working-dir "")
 (define db "/db.json")                   ;;the database that provides quotes for tweets and is processed through
-(define meta "/meta.json")               ;; meta-data
 (define last-posted "/last-posted.json") ;;last posted id; next tweet is last-posted + 1
-;;(define excerpts "/excerpts.json")       ;;temp holder that is freshly formatted quotes; must be merged into db
-
-
-
-
-(define (get-last-id)
-  ;;start with (+ last-posted 1) for this session unless last-posted==0 then start with 0
-  (let* (
-	 (p  (open-input-file (string-append working-dir last-posted)))
-	 (a (json-string->scm (get-string-all p)))
-	 (dummy (close-port p))
-	 (b (assoc-ref a "last-posted-id")))
-    b))
-
-(define (set-last-id x)
-(let* ((p  (open-output-file (string-append working-dir last-posted)))
-	 (a (scm->json-string `(("last-id" . ,x))))
-	 (dummy (put-string p a)))
-  (close-port p)))
 
   
 (define (get-all-new-quotes f)
   (let* ((p  (open-input-file f))
     	 (all-quotes   (string-split  (get-string-all p) #\newline)))    
     all-quotes))
-
-;; (("content"
-;;     .
-;;     "Propaganda's goal is to transform the buyer???s very world, so that the product must appear to be desirable as if without the prod of salesmanship.")
-;;    ("image" . "")
-;;    ("id" . 6))
 
 
 (define (process-quotes old new counter )

@@ -23,7 +23,7 @@
 	   (uri (string-append "https://github.com/mbcladwell/ebbot/releases/download/v0.1/ebbot-0.1.tar.gz"))
 	  (sha256
            (base32
-            "1701livwwy4yxqwy4bk771s4wj1a0dksrzs2i4f0pmb894ggxfw3"))
+            "00xg3s8if367jgl3bnsjpp6bnwix430sfwidil24ppx2b23a79yg"))
 	  ))
   (build-system gnu-build-system)
   (arguments `(#:tests? #false ; there are none
@@ -32,18 +32,20 @@
 				  (lambda* (#:key inputs outputs #:allow-other-keys)
 				    (let ((out  (assoc-ref outputs "out")))
 					  
-				 (substitute* "scripts/ebbot.sh"
+				 (substitute* '("scripts/ebbot.sh" "scripts/format.sh")
 						(("ebbotstorepath")
 						 out))
-				 (substitute* "scripts/ebbot.sh"
+				 (substitute* '("scripts/ebbot.sh" "scripts/format.sh")
 						(("guileloadpath")
-						 (string-append "\"$HOME" (assoc-ref inputs "guile")  "/share/guile/site/3.0:"
+						 (string-append  out "/share/guile/site/3.0:"
+								(assoc-ref inputs "guile")  "/share/guile/site/3.0:"
 								(assoc-ref inputs "guile-json")  "/share/guile/site/3.0:"
 								(assoc-ref inputs "guile-oauth")  "/share/guile/site/3.0:"
 								(getenv "GUILE_LOAD_PATH") "\"")))
-				  (substitute* "scripts/ebbot.sh"
+				  (substitute* '("scripts/ebbot.sh" "scripts/format.sh")
 						(("guileloadcompiledpath")
-						 (string-append "\"$HOME" (assoc-ref inputs "guile")  "/lib/guile/3.0/site-ccache:"
+						 (string-append  out "/lib/guile/3.0/site-ccache:"
+								(assoc-ref inputs "guile")  "/lib/guile/3.0/site-ccache:"
 								(assoc-ref inputs "guile-json")  "/lib/guile/3.0/site-ccache:"
 								(assoc-ref inputs "guile-oauth")  "/lib/guile/3.0/site-ccache:"
 								(getenv "GUILE_LOAD_COMPILED_PATH") "\""))))
@@ -51,7 +53,8 @@
 		       (add-before 'install 'make-scripts-dir
 			       (lambda* (#:key outputs #:allow-other-keys)
 				    (let* ((out  (assoc-ref outputs "out"))
-					   (bin-dir (string-append out "/bin"))			      		   
+					   (bin-dir (string-append out "/bin"))
+			      		   (dummy (install-file "scripts/format.sh" bin-dir))
 					   )            				       
 				      (install-file "scripts/ebbot.sh" bin-dir)
 				       #t)))
@@ -63,7 +66,7 @@
 					   (dummy (copy-recursively "./ebbot" ebbot-dir))) 
 				       #t)))
 	       
-		       (add-after 'install 'wrap-lnpg
+		       (add-after 'install 'wrap-ebbotsh
 				  (lambda* (#:key inputs outputs #:allow-other-keys)
 				    (let* ((out (assoc-ref outputs "out"))
 					   (bin-dir (string-append out "/bin"))
@@ -79,7 +82,25 @@
 						     `("GUILE_LOAD_COMPILED_PATH" prefix
 						       (,(string-append out go)))
 						     )		    
+				      #t)))
+		       (add-after 'install 'wrap-formatsh
+				  (lambda* (#:key inputs outputs #:allow-other-keys)
+				    (let* ((out (assoc-ref outputs "out"))
+					   (bin-dir (string-append out "/bin"))
+					    (scm  "/share/guile/site/3.0")
+					    (go   "/lib/guile/3.0/site-ccache")
+					    (dummy (chmod (string-append out "/bin/format.sh") #o555 ))
+					    (dummy (chmod (string-append out "/share/guile/site/3.0/ebbot/format.scm") #o555 ))
+					    ) ;;read execute, no write
+				      (wrap-program (string-append out "/bin/format.sh")
+						    `( "PATH" ":" prefix  (,bin-dir) )
+						     `("GUILE_LOAD_PATH" prefix
+						       (,(string-append out scm)))						
+						     `("GUILE_LOAD_COMPILED_PATH" prefix
+						       (,(string-append out go)))
+						     )		    
 				      #t)))	       
+
 		       )))
   (native-inputs
     `(("autoconf" ,autoconf)
@@ -93,4 +114,4 @@
   (home-page "www.build-a-bot.biz")
   (license license:gpl3+)))
 
-ebbot
+
