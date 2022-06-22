@@ -1,4 +1,3 @@
-
 (define-module (ebbot) 
 #:use-module (web client)
 #:use-module (srfi srfi-19) ;; date time
@@ -16,12 +15,11 @@
 #:use-module (ice-9 pretty-print)
 #:use-module (json)
 #:use-module (ice-9 textual-ports)
+;#:use-module (ebbot env)
 #:use-module (ebbot twitter)	 
 #:use-module (ebbot image)
 #:use-module (gcrypt base64)
 #:use-module (rnrs bytevectors)
-
-;;#:use-module (ebbot env)
 #:export (main
 	  *working-dir*
 	  ;;  *oauth-consumer-key*
@@ -43,8 +41,6 @@
 ;; (define *oauth-token-secret* #f)
 ;; (define *client-id* #f)
 ;; (define *client-secret* #f)
-
-
 
 
 (define (get-counter)
@@ -79,13 +75,16 @@
 	   (car lst)
 	  (find-by-id (cdr lst) id))))
 
+;;to run
+;;/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile -L . -e '(ebbot)' -s ebbot.scm /home/mbc/projects/bab/data/bernays 260
 
 (define (main args)
   ;; args: '( "working-dir" tweet-length )
   (let* ((start-time (current-time time-monotonic))
-	 (dummy (pretty-print (cadr args)))
+	 ;;(dummy (pretty-print (cadr args)))
 	 (dummy (set! *working-dir* (cadr args)))
 	 (dummy (set! tweet-length (string->number (caddr args))))
+	 ;;(dummy (get-vars *working-dir*))
 	 ;; (p  (open-input-file (string-append *working-dir* "/env.txt")))
  	 ;; (a (get-string-all p))
 	 ;; (b (base64-decode a))
@@ -115,7 +114,7 @@
    (oauth1-post-tweet-recurse tweets "" media-id 0)    
     ;; (pretty-print (string-append "Elapsed time: " (number->string  elapsed-time) " minutes." ))
     ;;   (pretty-print (string-append "new-counter: " (number->string new-counter) " media-directive: "  media-directive  " image-file: " (if image-file (string-append working-dir "/images/" image-file) "f")))
-;    (pretty-print image-file)
-    #f)
-    )
+ ;;   (pretty-print tweets)
+ ;;   #f)
+    ))
 

@@ -59,11 +59,13 @@ EXTRA_DIST += README.org \
               COPYING \
               guix.scm \
               .gitignore \
+              env.txt \
               hall.scm \
               build-aux/test-driver.scm \
               ebbot/twitter.scm \
               ebbot/image.scm \
               ebbot/format.scm \
+              ebbot/env.scm \
               scripts/ebbot.sh \
               scripts/format.sh \
               $(TESTS)
