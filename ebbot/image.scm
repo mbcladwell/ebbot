@@ -32,23 +32,6 @@
 #:export (upload-image
 	  get-image))
 
-;; (define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
-;; (define *oauth-consumer-secret* "if9ZzqTzYnD2hQbDWYqr4vU96Kbxa4J4LnU96FNybGSEXT0fmp")
-;; (define *bearer-token* "AAAAAAAAAAAAAAAAAAAAAENdbwEAAAAAK8xNPdkooUQG8UW2skHuRhgnaDo%3D6vkZYbDATcAgTBflgdz1Ng8MPT4qbTV12gh3RUjpt7YAxZj8pM")  ;;this does not change
-;; (define *oauth-access-token* "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH")
-;; (define *oauth-token-secret* "0Dxm5RXqRUR880NpXCLVekAfU50dcAbTvso6nlzHSQALy")
-;; (define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
-;; (define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
-
-;; (define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
-;; (define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
-;; (define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
-;; (define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
-;; (define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
-;; (define *client-id* (@@ (ebbot env) *client-id*))
-;; (define *client-secret* (@@ (ebbot env) *client-secret*))
-
-
 (define (oauth1-upload-media-finalize media-id )
   ;;Requires authentication? 	Yes (user context only)
   ;;https://developer.twitter.com/en/docs/authentication/oauth-1-0a/authorizing-a-request
@@ -263,8 +246,6 @@
 `(("media-id" . ,returned-media-id)("file-name" . ,img-file)("expires" . ,expires)) ))
 
 
-
-
 (define (get-random-image dir)
   ;;directory is (string-append working-dir "/random")
   (let* ((all-files (list->vector (cddr (scandir dir)) )))
@@ -276,8 +257,3 @@
 	(else (string-append working-dir "/specific/" directive))
      ))
   
-
-;; (define (get-image directive working-dir)
-;;   (if (equal? directive "none") #f
-;;       (if (equal? directive "random") (string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/")))
-;; 	 (string-append working-dir "/specific/" directive) )))  
