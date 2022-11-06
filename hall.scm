@@ -6,7 +6,7 @@
   (copyright (2022))
   (synopsis "")
   (description "")
-  (home-page "www.labsolns.com")
+  (home-page "www.build-a-bot.biz")
   (license gpl3+)
   (dependencies `())
   (skip ())

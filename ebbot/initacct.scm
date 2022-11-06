@@ -1,51 +1,48 @@
-#!/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile \
--e main -s
-!#
-
-(use-modules (web client)
-	     (srfi srfi-19) ;; date time
-	     (srfi srfi-1)  ;;list searching; delete-duplicates in list 
-	     (srfi srfi-9)  ;;records
-	     (artanis utils) ;;string->sha-256
-	     (web response)
-	     (web request)
-	     (web uri)
-	     (dbi dbi)  
-	     (ice-9 rdelim)
-	     (ice-9 i18n)   ;; internationalization
-	     (ice-9 popen)
-	     (ice-9 regex) ;;list-matches
-	     (ice-9 receive)	     
-	     (ice-9 string-fun)  ;;string-replace-substring
-	     (ice-9 pretty-print)
-	     (json)
-	     (ice-9 textual-ports)
-	     (gcrypt base64)
-	     (rnrs bytevectors)
-	     (ice-9 binary-ports) ;;get-bytevector-all
-	     )
+(define-module (ebbot initacct)
+#:use-module (web client)
+#:use-module (srfi srfi-19) ;; date time
+#:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
+#:use-module (srfi srfi-9)  ;;records
+;;#:use-module (artanis utils) ;;string->sha-256
+#:use-module (web response)
+#:use-module (web request)
+#:use-module (web uri)
+;;#:use-module (dbi dbi)  
+#:use-module (ice-9 rdelim)
+#:use-module (ice-9 i18n)   ;; internationalization
+#:use-module (ice-9 popen)
+#:use-module (ice-9 regex) ;;list-matches
+#:use-module (ice-9 receive)	     
+#:use-module (ice-9 string-fun)  ;;string-replace-substring
+#:use-module (ice-9 pretty-print)
+#:use-module (json)
+#:use-module (ice-9 textual-ports)
+#:use-module (gcrypt base64)
+#:use-module (rnrs bytevectors)
+#:use-module (ice-9 binary-ports) ;;get-bytevector-all
+#:export (main))
 
 ;;(load "/home/mbc/projects/ebbot/ebbot/import.scm")
 (define working-dir "")  ;;/home/mbc/projects/ebbot/data
 
-(define (get-tokens handle)
-  ;;must be the @handle
-  (let* (
-  	 (tbot (dbi-open "mysql" "plapan_tbot_admn:welcome:plapan_tbot:tcp:192.254.187.215:3306"))
-;;	 (sql-statement (string-append "SELECT auth_token, auth_token_secret, email FROM customer WHERE handle = '@jblo'"))
-	 (sql-statement (string-append "SELECT * FROM customer"))
-	 (dummy (dbi-query tbot sql-statement))
-	 (ret (dbi-get_row tbot))
-	  (results '())
-	  (dummy (while (not (equal? ret #f))
-	  	  (set! results (cons ret results))
-	  	  (set! ret (dbi-get_row tbot))
-	  	  ))
-	  (dummy (dbi-close tbot ))
-	 )
-    (pretty-print (dbi-get_row tbot))
+;; (define (get-tokens handle)
+;;   ;;must be the @handle
+;;   (let* (
+;;   	 (tbot (dbi-open "mysql" "plapan_tbot_admn:welcome:plapan_tbot:tcp:192.254.187.215:3306"))
+;; ;;	 (sql-statement (string-append "SELECT auth_token, auth_token_secret, email FROM customer WHERE handle = '@jblo'"))
+;; 	 (sql-statement (string-append "SELECT * FROM customer"))
+;; 	 (dummy (dbi-query tbot sql-statement))
+;; 	 (ret (dbi-get_row tbot))
+;; 	  (results '())
+;; 	  (dummy (while (not (equal? ret #f))
+;; 	  	  (set! results (cons ret results))
+;; 	  	  (set! ret (dbi-get_row tbot))
+;; 	  	  ))
+;; 	  (dummy (dbi-close tbot ))
+;; 	 )
+;;     (pretty-print (dbi-get_row tbot))
 
-  ))
+;;   ))
 
 ;; (define (update-accounts-file handle token)
 ;;   ;;this is not used
@@ -96,6 +93,9 @@
 
 
 ;; ./run-init-acct.sh /home/mbc/projects/bab/data handle /home/mbc/projects/bab/bab/creds.json 
+;; scp -i labsolns.pem  /home/mbc/projects/bab/bab/creds.json admin@
+
+;; init-acct.sh /home/admin/data handle /home/admin/creds.json
 
 (define (main args)
   ;; args: '( "working-dir" handle json_file )
@@ -107,7 +107,7 @@
 	 (handle (caddr args))
 	 (creds-input-json (cadddr args))
 	 (athandle (string-append "@" handle))
-	 (cust-dir (string-append working-dir "/" handle (substring (string->sha-256 handle ) 0 6)))
+	 (cust-dir (string-append working-dir "/" handle (substring (base64-encode (string->utf8 handle)) 0 6)))
 	 (creds-file (string-append cust-dir "/env.txt" ))
 	 (dummy (mkdir cust-dir))
 	 (dummy (make-last-posted-json cust-dir))
@@ -119,14 +119,3 @@
    (pretty-print args)    
     ))
 
-;;accounts.json:
-;;[{"id":1,"custid":"","handle":"dummy1","email":"email1"},{"id":0,"custid":"","handle":"dummy0","email":"email0"}]
-
-;; creds.json
-;; {"oauth-consumer-key":"tCO2sjfisuidunndk7qodx",
-;; "oauth-consumer-secret":"CMjjY1EogNfZwYoVcsflajsdljfiiUz1gsAemMg1jJZi",
-;; "bearer-token":"",
-;; "oauth-access-token":"151643193as;ldf;sldeMQKGsRA6sx1PBq",
-;; "oauth-token-secret":"BqbfTJU3slskdodolskskskslsol1SwwLtA5AVI",
-;; "client-id":"WFosllskdolskkdododoosU6MTpjaQ",
-;; "client-secret":""}

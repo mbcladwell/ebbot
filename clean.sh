@@ -18,6 +18,7 @@ cp /home/mbc/syncd/tobedeleted/ebbot/hall.scm .
 cp /home/mbc/syncd/tobedeleted/ebbot/Makefile.am .
 cp /home/mbc/syncd/tobedeleted/ebbot/ebbot.sh ./scripts
 cp /home/mbc/syncd/tobedeleted/ebbot/format.sh ./scripts
+cp /home/mbc/syncd/tobedeleted/ebbot/init-acct.sh ./scripts
 autoreconf -vif && ./configure && make
 
 make dist

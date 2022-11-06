@@ -64,10 +64,12 @@ EXTRA_DIST += README.org \
               build-aux/test-driver.scm \
               ebbot/twitter.scm \
               ebbot/image.scm \
+              ebbot/initacct.scm \
               ebbot/format.scm \
               ebbot/env.scm \
               scripts/ebbot.sh \
               scripts/format.sh \
+              scripts/init-acct.sh \
               $(TESTS)
 
 ACLOCAL_AMFLAGS = -I m4
