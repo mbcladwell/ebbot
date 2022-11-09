@@ -1,5 +1,4 @@
 (define-module (ebbot twitter) 
- #:use-module (ebbot env)
  #:use-module (web client)
  #:use-module (srfi srfi-19) ;; date time
  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -31,15 +30,50 @@
  #:use-module (rnrs bytevectors)
  #:use-module (ice-9 textual-ports)
  #:use-module (ebbot image)
+ #:use-module (gcrypt base64)
  #:export (oauth2-post-tweet
 	   oauth1-post-tweet
 	   oauth2-post-tweet-recurse
 	   oauth1-post-tweet-recurse	   
 	   chunk-a-tweet
-	   get-nonce))
+	   load-vars
+	   get-nonce
+	   *oauth-consumer-key*
+	  *oauth-consumer-secret*
+	  *bearer-token*
+	  *oauth-access-token*
+	  *oauth-token-secret*
+	  *client-id*
+	  *client-secret*))
+
+
+(define *oauth-consumer-key* #f)
+(define *oauth-consumer-secret* #f)
+(define *bearer-token* #f)
+(define *oauth-access-token* #f)
+(define *oauth-token-secret* #f)
+(define *client-id* #f)
+(define *client-secret* #f)
 
 
 (define nonce-chars (list->vector (string->list "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789")))
+
+(define (load-vars *working-dir*)
+(let*  (
+	(p  (open-input-file  (string-append *working-dir* "/env.txt")))
+ 	(a (get-string-all p))
+	(b (base64-decode a))
+	(varlst (json-string->scm (utf8->string b)))
+	)
+    (begin
+      (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
+      (set! *oauth-consumer-secret* (assoc-ref varlst "oauth-consumer-secret"))
+      (set! *bearer-token* (assoc-ref varlst "bearer-token"))
+      (set! *oauth-access-token* (assoc-ref varlst "oauth-access-token"))
+      (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
+      (set! *client-id* (assoc-ref varlst "client-id"))
+      (set! *client-secret* (assoc-ref varlst "client-secret")))))
+
 
 (define (get-nonce n s)
   "n is the length of the nonce
@@ -130,6 +164,9 @@
   ;;https://developer.twitter.com/en/docs/authentication/oauth-1-0a/authorizing-a-request
   ;;https://developer.twitter.com/en/docs/authentication/oauth-1-0a/creating-a-signature
   (let* (
+	 (dummy (pretty-print text))
+	 (dummy (pretty-print reply-id))
+	 (dummy (pretty-print media-id))
 	 (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
 	 (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
  	 (uri  "https://api.twitter.com/1.1/statuses/update.json")

@@ -13,13 +13,14 @@
 #:use-module (ice-9 string-fun)  ;;string-replace-substring
 #:use-module (ice-9 pretty-print)
 #:use-module (json)
+#:use-module ((rnrs io ports) #:select ((get-string-all . get-string-all-rnrs)))
+;;#:use-module ((ice-9 textual-ports) #:select ((get-string-all . get-string-all-txt)))
 #:use-module (ice-9 textual-ports)
 #:use-module (ebbot twitter)	 
 #:use-module (ebbot image)
-#:use-module (gcrypt base64)
-#:use-module (rnrs bytevectors)
 #:export (main
-	  *working-dir*))
+	  *working-dir*
+))
 
 
 (define *working-dir* "")
@@ -57,8 +58,9 @@
 	   (car lst)
 	  (find-by-id (cdr lst) id))))
 
+
 ;;to run
-;;/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile -L . -e '(ebbot)' -s ebbot.scm /home/mbc/projects/bab/data/bernays 260
+;;/gnu/store/1jgcbdzx2ss6xv59w55g3kr3x4935dfb-guile-3.0.8/bin/guile -L . -e '(ebbot)' -s ebbot.scm /home/mbc/data/jblo2cf0a6 260
 
 (define (main args)
   ;; args: '( "working-dir" tweet-length )
@@ -66,20 +68,23 @@
 	 ;;(dummy (pretty-print (cadr args)))
 	 (dummy (set! *working-dir* (cadr args)))
 	 (dummy (set! tweet-length (string->number (caddr args))))
+	 (dummy (load-vars *working-dir*))
 	 (counter (get-counter))
 	 (all-excerpts (get-all-excerpts-alist))
 	 (max-id (assoc-ref (car all-excerpts) "id"))
 	 (new-counter (if (= counter max-id) 0 (+ counter 1)))
 	 (entity (find-by-id all-excerpts new-counter))	 
 	 (tweets (chunk-a-tweet (assoc-ref entity "content") 260))
-	 (media-directive (assoc-ref entity "image"))
-	 (image-file (get-image media-directive *working-dir*))
-	  (media-id (if image-file (assoc-ref (upload-image image-file 2000) "media-id") ""))
+	; (media-directive (assoc-ref entity "image"))
+	; (image-file (get-image media-directive *working-dir*))
+	; (media-id (if image-file (assoc-ref (upload-image image-file 2000) "media-id") ""))
 	 (dummy (set-counter new-counter))
 	 (stop-time (current-time time-monotonic))
 	 (elapsed-time (ceiling (/ (time-second (time-difference stop-time start-time)) 60)))
 	 )
-   (oauth1-post-tweet-recurse tweets "" media-id 0)    
- ;;   #f)
+    (oauth1-post-tweet-recurse tweets "" "" 0)
+;;  (oauth1-post-tweet-recurse tweets "" media-id 0)
+;;  (pretty-print  tweets) 
+  ;;  #f
     ))
 

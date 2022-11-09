@@ -25,7 +25,7 @@
 #:use-module (rnrs io ports)
 #:use-module (ice-9 textual-ports)
 #:use-module (gcrypt base64)
-#:use-module (ebbot env)
+;;#:use-module (ebbot env)
 #:use-module (ebbot twitter)
 #:use-module (ebbot)
 
@@ -103,7 +103,8 @@
   (let* (
 	 (size-in-bytes (number->string (stat:size (stat file-name))))
 	 (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
-	 ;;(dummy (pretty-print (string-append "*oauth-access-token*: " *oauth-access-token*)))
+	 (dummy (pretty-print (string-append "*oauth-access-token*: " *oauth-access-token*)))
+	 (dummy (pretty-print (string-append "*oauth-consumer-key*: " *oauth-consumer-key*)))
 	 (suffix (cadr (string-split file-name #\.)))
 	 (media-type (string-append "image/" suffix))
 	 (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
@@ -115,15 +116,18 @@
 							   (oauth_timestamp . ,(oauth1-timestamp))
 							   (oauth_token . ,*oauth-access-token*)
 							   (oauth_version . "1.0")
-							    (command . "INIT")
-							  (total_bytes . ,size-in-bytes)
-							  (media_type . ,media-type)						 
+							   (command . "INIT")
+							   (total_bytes . ,size-in-bytes)
+							   (media_type . ,media-type)						 
 							   )))
 	 (dummy (oauth1-request-sign tweet-request credentials oauth1-response #:signature oauth1-signature-hmac-sha1))
 	 )
        (receive (response body)	       
-	  (oauth2-http-request tweet-request #:body #f )
-	 (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")) ))
+	   (oauth2-http-request tweet-request #:body #f )
+	 (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")
+	;; (pretty-print response	  (utf8->string body))	 
+	 )
+       ))
 
 
 (define (oauth1-upload-media-append media-id media counter)
@@ -165,7 +169,7 @@
   (if (null? (cdr lst))
       (oauth1-upload-media-append id (car lst) counter)
       (begin
-      ;; (receive (response body)	       
+	;; (receive (response body)
 	(oauth1-upload-media-append id (car lst) counter)
 	(set! counter (+ counter 1))
 	(oauth1-upload-media-append-recurse id (cdr lst) counter)	
@@ -233,7 +237,8 @@
   ;;chunk-size is the number of base64 characters per chunk, 2000 for twitter
  ;;returns: ((media-id . "1531607694968246272")(file-name . "/home/mbc/projects/bab/memes/prop2.png")(expires . 1654085152))
 
-  (let* ((all-chunks (chunk-an-image img-file chunk-size ))
+  (let* (
+	 (all-chunks (chunk-an-image img-file chunk-size ))
 	 (media-id (oauth1-upload-media-init  img-file))
 	 (dummy  (oauth1-upload-media-append-recurse  media-id all-chunks 0 ))
 	 (body  (receive (response body)		     

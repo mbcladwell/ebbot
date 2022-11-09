@@ -19,11 +19,11 @@
   (version "0.1")
   (source (origin
            (method url-fetch)
-	   ;;(uri "file:///home/mbc/projects/ebbot/ebbot-0.1.tar.gz")
-	   (uri (string-append "https://github.com/mbcladwell/ebbot/releases/download/v0.1/ebbot-0.1.tar.gz"))
+	   (uri "file:///home/mbc/projects/ebbot/ebbot-0.1.tar.gz")
+	   ;;(uri (string-append "https://github.com/mbcladwell/ebbot/releases/download/v0.1/ebbot-0.1.tar.gz"))
 	  (sha256
            (base32
-             "1mv9fwyi325x40f40gr3dhyv1cldl3nx6c9d5x336iwk1z8adyzq"))));;anchor1
+            "0g6ppkypr4628qgdlnvqsp10194dyrz8kwxbjiwayn2h258djkyh"))));;anchor1
   (build-system gnu-build-system)
   (arguments `(#:tests? #false ; there are none
 			#:phases (modify-phases %standard-phases
@@ -91,42 +91,6 @@
 					     all-files))					   					   	    
 				      #t))
 
-		       ;; (add-after 'install 'wrap-ebbotsh
-		       ;; 		  (lambda* (#:key inputs outputs #:allow-other-keys)
-		       ;; 		    (let* ((out (assoc-ref outputs "out"))
-		       ;; 			   (bin-dir (string-append out "/bin"))
-		       ;; 			    (scm  "/share/guile/site/3.0")
-		       ;; 			    (go   "/lib/guile/3.0/site-ccache")
-		       ;; 			    (dummy (chmod (string-append out "/bin/ebbot.sh") #o555 ))
-		       ;; 			    (dummy (chmod (string-append out "/share/guile/site/3.0/ebbot.scm") #o555 ))
-		       ;; 			    ) ;;read execute, no write
-		       ;; 		      (wrap-program (string-append out "/bin/ebbot.sh")
-		       ;; 				    `( "PATH" ":" prefix  (,bin-dir) )
-		       ;; 				     `("GUILE_LOAD_PATH" prefix
-		       ;; 				       (,(string-append out scm)))						
-		       ;; 				     `("GUILE_LOAD_COMPILED_PATH" prefix
-		       ;; 				       (,(string-append out go)))
-		       ;; 				     )		    
-		       ;; 		      #t)))
-		       ;; (add-after 'install 'wrap-formatsh
-		       ;; 		  (lambda* (#:key inputs outputs #:allow-other-keys)
-		       ;; 		    (let* ((out (assoc-ref outputs "out"))
-		       ;; 			   (bin-dir (string-append out "/bin"))
-		       ;; 			    (scm  "/share/guile/site/3.0")
-		       ;; 			    (go   "/lib/guile/3.0/site-ccache")
-		       ;; 			    (dummy (chmod (string-append out "/bin/format.sh") #o555 ))
-		       ;; 			    (dummy (chmod (string-append out "/share/guile/site/3.0/ebbot/format.scm") #o555 ))
-		       ;; 			    ) ;;read execute, no write
-		       ;; 		      (wrap-program (string-append out "/bin/format.sh")
-		       ;; 				    `( "PATH" ":" prefix  (,bin-dir) )
-		       ;; 				     `("GUILE_LOAD_PATH" prefix
-		       ;; 				       (,(string-append out scm)))						
-		       ;; 				     `("GUILE_LOAD_COMPILED_PATH" prefix
-		       ;; 				       (,(string-append out go)))
-		       ;; 				     )		    
-		       ;; 		      #t)))
-		       
-
 		       )))
   (native-inputs
     `(("autoconf" ,autoconf)
@@ -141,5 +105,5 @@
   (license license:gpl3+)))
 
 
-
+ebbot
 

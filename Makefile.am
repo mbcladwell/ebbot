@@ -66,7 +66,6 @@ EXTRA_DIST += README.org \
               ebbot/image.scm \
               ebbot/initacct.scm \
               ebbot/format.scm \
-              ebbot/env.scm \
               scripts/ebbot.sh \
               scripts/format.sh \
               scripts/init-acct.sh \
