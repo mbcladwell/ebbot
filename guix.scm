@@ -18,57 +18,54 @@
   (name "ebbot")
   (version "0.1")
   (source (origin
-           (method url-fetch)
-	   (uri "file:///home/mbc/projects/ebbot/ebbot-0.1.tar.gz")
-	   ;;(uri (string-append "https://github.com/mbcladwell/ebbot/releases/download/v0.1/ebbot-0.1.tar.gz"))
-	  (sha256
-           (base32
-            "0g6ppkypr4628qgdlnvqsp10194dyrz8kwxbjiwayn2h258djkyh"))));;anchor1
-  (build-system gnu-build-system)
+           (method git-fetch)
+                (uri (git-reference
+                      (url "git://github.com/mbcladwell/ebbot.git")
+                      (commit "65b1e28324c33ce778582e42b9f9224599ae50cf")))
+                (sha256 (base32 "09w0i13xfak3ydyqf48pfq76889gz9q5mpfizdclqxwrq4dvcgaf"))
+  		))
+          ;;  (method url-fetch)
+	  ;;  (uri "file:///home/mbc/projects/ebbot/ebbot-0.1.tar.gz")
+	  ;;  ;;(uri (string-append "https://github.com/mbcladwell/ebbot/releases/download/v0.1/ebbot-0.1.tar.gz"))
+	  ;; (sha256
+          ;;  (base32
+          ;;   "0g6ppkypr4628qgdlnvqsp10194dyrz8kwxbjiwayn2h258djkyh"))));;anchor1
+  (build-system guile-build-system)
   (arguments `(#:tests? #false ; there are none
 			#:phases (modify-phases %standard-phases
     		       (add-after 'unpack 'patch-prefix
 				  (lambda* (#:key inputs outputs #:allow-other-keys)
-				    (let ((out  (assoc-ref outputs "out")))
-					  
-				 (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
-						(("ebbotstorepath")
-						 out))
-				 (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
-						(("guileloadpath")
-						 (string-append  out "/share/guile/site/3.0:"
-								(assoc-ref inputs "guile")  "/share/guile/site/3.0:"
-								(assoc-ref inputs "guile-json")  "/share/guile/site/3.0:"
-								(assoc-ref inputs "guile-oauth")  "/share/guile/site/3.0:"
-								(getenv "GUILE_LOAD_PATH") "\"")))
-				  (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
-						(("guileexecutable")
-						   (string-append (assoc-ref inputs "guile") "/bin/guile")))
-				 
-				  (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
-						(("guileloadcompiledpath")
-						 (string-append  out "/lib/guile/3.0/site-ccache:"
-								(assoc-ref inputs "guile")  "/lib/guile/3.0/site-ccache:"
-								(assoc-ref inputs "guile-json")  "/lib/guile/3.0/site-ccache:"
-								(assoc-ref inputs "guile-oauth")  "/lib/guile/3.0/site-ccache:"
-								(getenv "GUILE_LOAD_COMPILED_PATH") "\""))))
-					#t))		    
-		       ;; (add-before 'install 'make-scripts-dir
-		       ;; 	       (lambda* (#:key outputs #:allow-other-keys)
-		       ;; 		    (let* ((out  (assoc-ref outputs "out"))
-		       ;; 			   (bin-dir (string-append out "/bin"))
-		       ;; 	      		   (dummy (install-file "scripts/format.sh" bin-dir))
-		       ;; 			   )            				       
-		       ;; 		      (install-file "scripts/ebbot.sh" bin-dir)
-		       ;; 		       #t)))
-			(add-after 'unpack 'make-dir
-				   (lambda* (#:key outputs #:allow-other-keys)
-				     (let* ((out  (assoc-ref outputs "out"))
-					   (ebbot-dir (string-append out "/share/guile/site/3.0/ebbot"))
-					   (mkdir-p ebbot-dir)
-					   (dummy (copy-recursively "./ebbot" ebbot-dir))) 
-				       #t)))
-
+				    (let ((out  (assoc-ref outputs "out")))					  
+				      (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
+					(("ebbotstorepath")
+					 out))
+				      (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
+					(("guileloadpath")
+					 (string-append  out "/share/guile/site/3.0:"
+							 (assoc-ref inputs "guile")  "/share/guile/site/3.0:"
+							 (assoc-ref inputs "guile-json")  "/share/guile/site/3.0:"
+							 (assoc-ref inputs "guile-oauth")  "/share/guile/site/3.0:"
+							 (getenv "GUILE_LOAD_PATH") "\"")))
+				      (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
+					(("guileexecutable")
+					 (string-append (assoc-ref inputs "guile") "/bin/guile")))
+				      
+				      (substitute* '("scripts/ebbot.sh" "scripts/format.sh" "scripts/init-acct.sh")
+					(("guileloadcompiledpath")
+					 (string-append  out "/lib/guile/3.0/site-ccache:"
+							 (assoc-ref inputs "guile")  "/lib/guile/3.0/site-ccache:"
+							 (assoc-ref inputs "guile-json")  "/lib/guile/3.0/site-ccache:"
+							 (assoc-ref inputs "guile-oauth")  "/lib/guile/3.0/site-ccache:"
+							 (getenv "GUILE_LOAD_COMPILED_PATH") "\""))))
+				    #t))		    
+		       (add-after 'unpack 'make-dir
+			 (lambda* (#:key outputs #:allow-other-keys)
+			   (let* ((out  (assoc-ref outputs "out"))
+				  (ebbot-dir (string-append out "/share/guile/site/3.0/ebbot"))
+				  (mkdir-p ebbot-dir)
+				  (dummy (copy-recursively "./ebbot" ebbot-dir))) 
+			     #t)))
+		       
 			   (add-after 'install 'make-bin-dir
 				  (lambda* (#:key inputs outputs #:allow-other-keys)
 				    (let* ((out (assoc-ref outputs "out"))
@@ -93,9 +90,7 @@
 
 		       )))
   (native-inputs
-    `(("autoconf" ,autoconf)
-      ("automake" ,automake)
-      ("pkg-config" ,pkg-config)
+    `(
       ("texinfo" ,texinfo)))
   (inputs `(("guile" ,guile-3.0)))
   (propagated-inputs `( ("guile-json" ,guile-json-4) ("guile-oauth" ,guile-oauth)))
