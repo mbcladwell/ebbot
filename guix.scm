@@ -1,16 +1,21 @@
-(define-module (labsolns ebbot)
-#:use-module (guix packages)
+(define-module (ebbot)
+  #:use-module (guix packages)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system gnu)
-  #:use-module (gnu packages)
+  #:use-module (guix utils)
   #:use-module (gnu packages autotools)
+  #:use-module (gnu packages)
   #:use-module (gnu packages guile)
+  #:use-module (guix build-system guile)
+;;  #:use-module (guix build guile-build-system)  
   #:use-module (gnu packages guile-xyz)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages texinfo)
-  #:use-module (labsolns  guile-oauth)
+  #:use-module (labsolns guile-oauth)
   #:use-module (json)
+
   )
 
 (define-public ebbot
@@ -20,10 +25,9 @@
   (source (origin
            (method git-fetch)
                 (uri (git-reference
-                      (url "git://github.com/mbcladwell/ebbot.git")
-                      (commit "65b1e28324c33ce778582e42b9f9224599ae50cf")))
-                (sha256 (base32 "09w0i13xfak3ydyqf48pfq76889gz9q5mpfizdclqxwrq4dvcgaf"))
-  		))
+                      (url "https://github.com/mbcladwell/ebbot")
+                      (commit "46317e992453e377a3bdcc04499623b443ea8e0f")))
+                (sha256 (base32 "1h6w8znf4mza4ac93r2d3bzq5i293rr77h1kmsw3580fv92g971n"))));;anchor1
           ;;  (method url-fetch)
 	  ;;  (uri "file:///home/mbc/projects/ebbot/ebbot-0.1.tar.gz")
 	  ;;  ;;(uri (string-append "https://github.com/mbcladwell/ebbot/releases/download/v0.1/ebbot-0.1.tar.gz"))
@@ -31,7 +35,13 @@
           ;;  (base32
           ;;   "0g6ppkypr4628qgdlnvqsp10194dyrz8kwxbjiwayn2h258djkyh"))));;anchor1
   (build-system guile-build-system)
-  (arguments `(#:tests? #false ; there are none
+  (arguments `(
+	       #:modules (((guix build guile-build-system)
+			   #:select (target-guile-effective-version))
+			  ,@%gnu-build-system-modules)
+			 #:imported-modules ((guix build guile-build-system)
+					     ,@%gnu-build-system-modules)
+	     ;;  #:tests? #false ; there are none
 			#:phases (modify-phases %standard-phases
     		       (add-after 'unpack 'patch-prefix
 				  (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -58,7 +68,7 @@
 							 (assoc-ref inputs "guile-oauth")  "/lib/guile/3.0/site-ccache:"
 							 (getenv "GUILE_LOAD_COMPILED_PATH") "\""))))
 				    #t))		    
-		       (add-after 'unpack 'make-dir
+		       (add-after 'patch-prefix 'make-dir
 			 (lambda* (#:key outputs #:allow-other-keys)
 			   (let* ((out  (assoc-ref outputs "out"))
 				  (ebbot-dir (string-append out "/share/guile/site/3.0/ebbot"))
@@ -66,7 +76,7 @@
 				  (dummy (copy-recursively "./ebbot" ebbot-dir))) 
 			     #t)))
 		       
-			   (add-after 'install 'make-bin-dir
+			   (add-after 'make-dir 'make-bin-dir
 				  (lambda* (#:key inputs outputs #:allow-other-keys)
 				    (let* ((out (assoc-ref outputs "out"))
 					   (bin-dir (string-append out "/bin"))
@@ -76,7 +86,7 @@
 				      (map (lambda (file)
 					     (begin
 					       (install-file (string-append "./scripts/" file) bin-dir)
-					       (chmod (string-append bin-dir "/" file) #o555 ) ;;read execute, no write
+					       (chmod (string-append bin-dir "/" file) #o555 ) read execute, no write
 					       (wrap-program (string-append bin-dir "/" file)
 							     `( "PATH" ":" prefix  (,bin-dir) )							     
 							     `("GUILE_LOAD_PATH" prefix
@@ -89,16 +99,15 @@
 				      #t))
 
 		       )))
-  (native-inputs
-    `(
-      ("texinfo" ,texinfo)))
-  (inputs `(("guile" ,guile-3.0)))
+  (inputs
+    `(("guile" ,guile-3.0)
+      ))
+ ;; (inputs `(("guile" ,guile-3.0)))
   (propagated-inputs `( ("guile-json" ,guile-json-4) ("guile-oauth" ,guile-oauth)))
   (synopsis "Auto tweeter for educational tweets concerning propaganda")
   (description "Auto tweeter for educational tweets concerning propaganda")
   (home-page "www.build-a-bot.biz")
   (license license:gpl3+)))
-
 
 ebbot
 
