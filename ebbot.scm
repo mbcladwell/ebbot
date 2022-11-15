@@ -84,7 +84,7 @@
 	 )
   ;;  (oauth1-post-tweet-recurse tweets "" "" 0)
  ;; (oauth1-post-tweet-recurse tweets "" media-id 0)
- (oauth1-upload-media-init  "/home/mbc/data/jblo2cf0a6/random/aliens.jpeg") 
-  ;;  #f
+;; (oauth1-upload-media-init  "/home/mbc/data/jblo2cf0a6/random/aliens.jpeg") 
+    #f
     ))
 

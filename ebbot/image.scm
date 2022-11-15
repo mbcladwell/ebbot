@@ -125,8 +125,8 @@
 	 )
        (receive (response body)	       
 	   (oauth2-http-request tweet-request #:body #f )
- (pretty-print (string-append "media-id: " (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")))
-	;; (pretty-print response	  (utf8->string body))	 
+;; (pretty-print (string-append "media-id: " (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")))
+	 (pretty-print response	  (utf8->string body))	 
 	 )
        ))
 
