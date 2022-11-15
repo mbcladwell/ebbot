@@ -30,6 +30,7 @@
 #:use-module (ebbot)
 
 #:export (upload-image
+	  oauth1-upload-media-init
 	  get-image))
 
 (define (oauth1-upload-media-finalize media-id )
@@ -124,7 +125,7 @@
 	 )
        (receive (response body)	       
 	   (oauth2-http-request tweet-request #:body #f )
-	 (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")
+ (pretty-print (string-append "media-id: " (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")))
 	;; (pretty-print response	  (utf8->string body))	 
 	 )
        ))

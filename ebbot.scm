@@ -1,7 +1,7 @@
 (define-module (ebbot) 
 #:use-module (web client)
 #:use-module (srfi srfi-19) ;; date time
-#:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 					;  #:use-module (srfi srfi-9)  ;;records
+#:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list    
 #:use-module (web response)
 #:use-module (web request)
 #:use-module (web uri)
@@ -75,16 +75,16 @@
 	 (new-counter (if (= counter max-id) 0 (+ counter 1)))
 	 (entity (find-by-id all-excerpts new-counter))	 
 	 (tweets (chunk-a-tweet (assoc-ref entity "content") 260))
-	; (media-directive (assoc-ref entity "image"))
-	; (image-file (get-image media-directive *working-dir*))
-	; (media-id (if image-file (assoc-ref (upload-image image-file 2000) "media-id") ""))
+	;; (media-directive (assoc-ref entity "image"))
+	;; (image-file (get-image media-directive *working-dir*))
+	;; (media-id (if image-file (assoc-ref (upload-image image-file 2000) "media-id") ""))
 	 (dummy (set-counter new-counter))
 	 (stop-time (current-time time-monotonic))
 	 (elapsed-time (ceiling (/ (time-second (time-difference stop-time start-time)) 60)))
 	 )
-    (oauth1-post-tweet-recurse tweets "" "" 0)
-;;  (oauth1-post-tweet-recurse tweets "" media-id 0)
-;;  (pretty-print  tweets) 
+  ;;  (oauth1-post-tweet-recurse tweets "" "" 0)
+ ;; (oauth1-post-tweet-recurse tweets "" media-id 0)
+ (oauth1-upload-media-init  "/home/mbc/data/jblo2cf0a6/random/aliens.jpeg") 
   ;;  #f
     ))
 
