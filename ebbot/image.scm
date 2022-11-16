@@ -237,9 +237,6 @@
  ;;returns: ((media-id . "1531607694968246272")(file-name . "/home/mbc/projects/bab/memes/prop2.png")(expires . 1654085152))
 
   (let* (
-	 (dummy (pretty-print "*oauth-access-token*: " *oauth-access-token*))
-	 (dummy (pretty-print "*oauth-token-secret*: " *oauth-token-secret*))
-
 	 (all-chunks (chunk-an-image img-file chunk-size ))
 	 (media-id (oauth1-upload-media-init  img-file))
 	 (dummy  (oauth1-upload-media-append-recurse  media-id all-chunks 0 ))

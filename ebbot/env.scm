@@ -34,6 +34,8 @@
     (set! *client-id* (assoc-ref varlst "client-id"))
     (set! *client-secret* (assoc-ref varlst "client-secret"))))
    
+	  (pretty-print "*oauth-access-token*: " *oauth-access-token*)
+	  (pretty-print "*oauth-token-secret*: " *oauth-token-secret*)
 
 
 (define (convert-to-encrypted fin fout)
