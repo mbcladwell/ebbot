@@ -22,6 +22,7 @@
   #:use-module (oauth utils)
   #:use-module (oauth request)
   #:use-module (rnrs bytevectors)
+  #:use-module (gcrypt base64)
   #:use-module (rnrs io ports)
   #:use-module (ice-9 textual-ports)
   #:use-module (ebbot)
