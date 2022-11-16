@@ -18,6 +18,8 @@
 #:use-module (ice-9 textual-ports)
 #:use-module (ebbot twitter)	 
 #:use-module (ebbot image)
+ #:use-module (rnrs bytevectors)
+ #:use-module (gcrypt base64)
 #:export (main
 	  *working-dir*
 ))
@@ -25,6 +27,7 @@
 
 (define *working-dir* "")
 (define tweet-length 0)
+
 
 (define (get-counter)
   ;;counter is the last tweeted id
@@ -68,23 +71,24 @@
 	 ;;(dummy (pretty-print (cadr args)))
 	 (dummy (set! *working-dir* (cadr args)))
 	 (dummy (set! tweet-length (string->number (caddr args))))
-	 (dummy (load-vars *working-dir*))
 	 (counter (get-counter))
 	 (all-excerpts (get-all-excerpts-alist))
 	 (max-id (assoc-ref (car all-excerpts) "id"))
 	 (new-counter (if (= counter max-id) 0 (+ counter 1)))
 	 (entity (find-by-id all-excerpts new-counter))	 
 	 (tweets (chunk-a-tweet (assoc-ref entity "content") 260))
-	;; (media-directive (assoc-ref entity "image"))
-	;; (image-file (get-image media-directive *working-dir*))
-	;; (media-id (if image-file (assoc-ref (upload-image image-file 2000) "media-id") ""))
+	 (media-directive (assoc-ref entity "image"))
+	 (image-file (get-image media-directive *working-dir*))
+	 (media-id (if image-file (assoc-ref (upload-image image-file 2000) "media-id") ""))
 	 (dummy (set-counter new-counter))
 	 (stop-time (current-time time-monotonic))
 	 (elapsed-time (ceiling (/ (time-second (time-difference stop-time start-time)) 60)))
 	 )
-  ;;  (oauth1-post-tweet-recurse tweets "" "" 0)
- ;; (oauth1-post-tweet-recurse tweets "" media-id 0)
-;; (oauth1-upload-media-init  "/home/mbc/data/jblo2cf0a6/random/aliens.jpeg") 
-    #f
+    (begin
+      (oauth1-post-tweet-recurse tweets "" media-id 0)
+      (pretty-print "*oauth-access-token*: " *oauth-access-token*)
+      (pretty-print "*oauth-token-secret*: " *oauth-token-secret*)
+      )
+;;    #f
     ))
 

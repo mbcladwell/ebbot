@@ -1,37 +1,35 @@
 (define-module (ebbot image) 
- #:use-module (web client)
-#:use-module (srfi srfi-19) ;; date time
-#:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
-#:use-module (srfi srfi-9)  ;;records
-#:use-module (web response)
-#:use-module (web request)
-#:use-module (web uri)
-#:use-module (web client)
-#:use-module (web http)
-#:use-module (ice-9 rdelim)
-#:use-module (ice-9 popen)
-#:use-module (ice-9 regex) ;;list-matches
-#:use-module (ice-9 receive)	     
-#:use-module (ice-9 string-fun)  ;;string-replace-substring
-#:use-module (ice-9 pretty-print)
-#:use-module (ice-9 binary-ports)
-#:use-module (ice-9 ftw)
-#:use-module (json)
-#:use-module (oauth oauth1)
-#:use-module (oauth oauth2)
-#:use-module (oauth utils)
-#:use-module (oauth request)
-#:use-module (rnrs bytevectors)
-#:use-module (rnrs io ports)
-#:use-module (ice-9 textual-ports)
-#:use-module (gcrypt base64)
-;;#:use-module (ebbot env)
-#:use-module (ebbot twitter)
-#:use-module (ebbot)
-
-#:export (upload-image
-	  oauth1-upload-media-init
-	  get-image))
+  #:use-module (web client)
+  #:use-module (srfi srfi-19) ;; date time
+  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
+  #:use-module (srfi srfi-9)  ;;records
+  #:use-module (web response)
+  #:use-module (web request)
+  #:use-module (web uri)
+  #:use-module (web client)
+  #:use-module (web http)
+  #:use-module (ice-9 rdelim)
+  #:use-module (ice-9 popen)
+  #:use-module (ice-9 regex) ;;list-matches
+  #:use-module (ice-9 receive)	     
+  #:use-module (ice-9 string-fun)  ;;string-replace-substring
+  #:use-module (ice-9 pretty-print)
+  #:use-module (ice-9 binary-ports)
+  #:use-module (ice-9 ftw)
+  #:use-module (json)
+  #:use-module (oauth oauth1)
+  #:use-module (oauth oauth2)
+  #:use-module (oauth utils)
+  #:use-module (oauth request)
+  #:use-module (rnrs bytevectors)
+  #:use-module (rnrs io ports)
+  #:use-module (ice-9 textual-ports)
+  #:use-module (ebbot)
+  #:use-module (ebbot env)
+  #:use-module (ebbot twitter)
+  #:export (upload-image
+	    oauth1-upload-media-init
+	    get-image))
 
 (define (oauth1-upload-media-finalize media-id )
   ;;Requires authentication? 	Yes (user context only)
@@ -125,10 +123,10 @@
 	 )
        (receive (response body)	       
 	   (oauth2-http-request tweet-request #:body #f )
-;; (pretty-print (string-append "media-id: " (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")))
-	 (pretty-print response	  (utf8->string body))	 
+ (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string"))
+;;	 (pretty-print response	  (utf8->string body))	 
 	 )
-       ))
+       )
 
 
 (define (oauth1-upload-media-append media-id media counter)
@@ -239,6 +237,9 @@
  ;;returns: ((media-id . "1531607694968246272")(file-name . "/home/mbc/projects/bab/memes/prop2.png")(expires . 1654085152))
 
   (let* (
+	 (dummy (pretty-print "*oauth-access-token*: " *oauth-access-token*))
+	 (dummy (pretty-print "*oauth-token-secret*: " *oauth-token-secret*))
+
 	 (all-chunks (chunk-an-image img-file chunk-size ))
 	 (media-id (oauth1-upload-media-init  img-file))
 	 (dummy  (oauth1-upload-media-append-recurse  media-id all-chunks 0 ))
