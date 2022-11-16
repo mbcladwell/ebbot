@@ -1,36 +1,53 @@
 (define-module (ebbot image) 
-  #:use-module (web client)
-  #:use-module (srfi srfi-19) ;; date time
-  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
-  #:use-module (srfi srfi-9)  ;;records
-  #:use-module (web response)
-  #:use-module (web request)
-  #:use-module (web uri)
-  #:use-module (web client)
-  #:use-module (web http)
-  #:use-module (ice-9 rdelim)
-  #:use-module (ice-9 popen)
-  #:use-module (ice-9 regex) ;;list-matches
-  #:use-module (ice-9 receive)	     
-  #:use-module (ice-9 string-fun)  ;;string-replace-substring
-  #:use-module (ice-9 pretty-print)
-  #:use-module (ice-9 binary-ports)
-  #:use-module (ice-9 ftw)
-  #:use-module (json)
-  #:use-module (oauth oauth1)
-  #:use-module (oauth oauth2)
-  #:use-module (oauth utils)
-  #:use-module (oauth request)
-  #:use-module (rnrs bytevectors)
-  #:use-module (gcrypt base64)
-  #:use-module (rnrs io ports)
-  #:use-module (ice-9 textual-ports)
-  #:use-module (ebbot)
-  #:use-module (ebbot env)
-  #:use-module (ebbot twitter)
-  #:export (upload-image
-	    oauth1-upload-media-init
-	    get-image))
+ #:use-module (web client)
+#:use-module (srfi srfi-19) ;; date time
+#:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
+#:use-module (srfi srfi-9)  ;;records
+#:use-module (web response)
+#:use-module (web request)
+#:use-module (web uri)
+#:use-module (web client)
+#:use-module (web http)
+#:use-module (ice-9 rdelim)
+#:use-module (ice-9 popen)
+#:use-module (ice-9 regex) ;;list-matches
+#:use-module (ice-9 receive)	     
+#:use-module (ice-9 string-fun)  ;;string-replace-substring
+#:use-module (ice-9 pretty-print)
+#:use-module (ice-9 binary-ports)
+#:use-module (ice-9 ftw)
+#:use-module (json)
+#:use-module (oauth oauth1)
+#:use-module (oauth oauth2)
+#:use-module (oauth utils)
+#:use-module (oauth request)
+#:use-module (rnrs bytevectors)
+#:use-module (rnrs io ports)
+#:use-module (ice-9 textual-ports)
+#:use-module (gcrypt base64)
+#:use-module (ebbot env)
+#:use-module (ebbot twitter)
+#:use-module (ebbot)
+
+#:export (upload-image
+	  get-image))
+
+;; (define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
+;; (define *oauth-consumer-secret* "if9ZzqTzYnD2hQbDWYqr4vU96Kbxa4J4LnU96FNybGSEXT0fmp")
+;; (define *bearer-token* "AAAAAAAAAAAAAAAAAAAAAENdbwEAAAAAK8xNPdkooUQG8UW2skHuRhgnaDo%3D6vkZYbDATcAgTBflgdz1Ng8MPT4qbTV12gh3RUjpt7YAxZj8pM")  ;;this does not change
+;; (define *oauth-access-token* "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH")
+;; (define *oauth-token-secret* "0Dxm5RXqRUR880NpXCLVekAfU50dcAbTvso6nlzHSQALy")
+;; (define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
+;; (define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
+
+(define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
+(define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
+(define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
+(define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
+(define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
+(define *client-id* (@@ (ebbot env) *client-id*))
+(define *client-secret* (@@ (ebbot env) *client-secret*))
+
 
 (define (oauth1-upload-media-finalize media-id )
   ;;Requires authentication? 	Yes (user context only)
@@ -103,8 +120,7 @@
   (let* (
 	 (size-in-bytes (number->string (stat:size (stat file-name))))
 	 (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
-	 (dummy (pretty-print (string-append "*oauth-access-token*: " *oauth-access-token*)))
-	 (dummy (pretty-print (string-append "*oauth-consumer-key*: " *oauth-consumer-key*)))
+	 ;;(dummy (pretty-print (string-append "*oauth-access-token*: " *oauth-access-token*)))
 	 (suffix (cadr (string-split file-name #\.)))
 	 (media-type (string-append "image/" suffix))
 	 (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
@@ -116,18 +132,15 @@
 							   (oauth_timestamp . ,(oauth1-timestamp))
 							   (oauth_token . ,*oauth-access-token*)
 							   (oauth_version . "1.0")
-							   (command . "INIT")
-							   (total_bytes . ,size-in-bytes)
-							   (media_type . ,media-type)						 
+							    (command . "INIT")
+							  (total_bytes . ,size-in-bytes)
+							  (media_type . ,media-type)						 
 							   )))
 	 (dummy (oauth1-request-sign tweet-request credentials oauth1-response #:signature oauth1-signature-hmac-sha1))
 	 )
        (receive (response body)	       
-	   (oauth2-http-request tweet-request #:body #f )
-(pretty-print  (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")))
-;;	 (pretty-print response	  (utf8->string body))	 
-	 )
-       )
+	  (oauth2-http-request tweet-request #:body #f )
+	 (assoc-ref  (json-string->scm (utf8->string body)) "media_id_string")) ))
 
 
 (define (oauth1-upload-media-append media-id media counter)
@@ -169,7 +182,7 @@
   (if (null? (cdr lst))
       (oauth1-upload-media-append id (car lst) counter)
       (begin
-	;; (receive (response body)
+      ;; (receive (response body)	       
 	(oauth1-upload-media-append id (car lst) counter)
 	(set! counter (+ counter 1))
 	(oauth1-upload-media-append-recurse id (cdr lst) counter)	
@@ -237,8 +250,7 @@
   ;;chunk-size is the number of base64 characters per chunk, 2000 for twitter
  ;;returns: ((media-id . "1531607694968246272")(file-name . "/home/mbc/projects/bab/memes/prop2.png")(expires . 1654085152))
 
-  (let* (
-	 (all-chunks (chunk-an-image img-file chunk-size ))
+  (let* ((all-chunks (chunk-an-image img-file chunk-size ))
 	 (media-id (oauth1-upload-media-init  img-file))
 	 (dummy  (oauth1-upload-media-append-recurse  media-id all-chunks 0 ))
 	 (body  (receive (response body)		     
@@ -249,6 +261,8 @@
 	 (expires (+ expires-after-seconds (time-second (current-time))))		
 	 )
 `(("media-id" . ,returned-media-id)("file-name" . ,img-file)("expires" . ,expires)) ))
+
+
 
 
 (define (get-random-image dir)
@@ -262,3 +276,8 @@
 	(else (string-append working-dir "/specific/" directive))
      ))
   
+
+;; (define (get-image directive working-dir)
+;;   (if (equal? directive "none") #f
+;;       (if (equal? directive "random") (string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/")))
+;; 	 (string-append working-dir "/specific/" directive) )))  

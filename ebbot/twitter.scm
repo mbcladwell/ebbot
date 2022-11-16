@@ -1,4 +1,5 @@
 (define-module (ebbot twitter) 
+ #:use-module (ebbot env)
  #:use-module (web client)
  #:use-module (srfi srfi-19) ;; date time
  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -27,16 +28,32 @@
  #:use-module (oauth oauth1 utils)
  #:use-module (oauth oauth1 credentials)
  #:use-module (oauth oauth1 signature)
+ #:use-module (rnrs bytevectors)
  #:use-module (ice-9 textual-ports)
  #:use-module (ebbot image)
- #:use-module (ebbot env)
  #:export (oauth2-post-tweet
 	   oauth1-post-tweet
 	   oauth2-post-tweet-recurse
 	   oauth1-post-tweet-recurse	   
 	   chunk-a-tweet
-	   get-nonce
-	  ))
+	   get-nonce))
+
+
+;; (define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
+;; (define *oauth-consumer-secret* "if9ZzqTzYnD2hQbDWYqr4vU96Kbxa4J4LnU96FNybGSEXT0fmp")
+;; (define *bearer-token* "AAAAAAAAAAAAAAAAAAAAAENdbwEAAAAAK8xNPdkooUQG8UW2skHuRhgnaDo%3D6vkZYbDATcAgTBflgdz1Ng8MPT4qbTV12gh3RUjpt7YAxZj8pM")  ;;this does not change
+;; (define *oauth-access-token* "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH")
+;; (define *oauth-token-secret* "0Dxm5RXqRUR880NpXCLVekAfU50dcAbTvso6nlzHSQALy")
+;; (define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
+;; (define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
+
+(define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
+(define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
+(define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
+(define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
+(define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
+(define *client-id* (@@ (ebbot env) *client-id*))
+(define *client-secret* (@@ (ebbot env) *client-secret*))
 
 
 (define nonce-chars (list->vector (string->list "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789")))
@@ -58,6 +75,9 @@
   (access_token response-token-access-token))
 
 (define oauth-response-token-record (make-response-token "bearer" *oauth-access-token* ))
+
+;#<<oauth1-response> token: "856105513800609792-ttQfcoxgrGJnwaLfjEdyagDjL9lfbTP" secret: "EfoSSaCHSnmfkhfU2r5oiU03cA6Kb6SLLAr7rxZO73Tfg" params: (("user_id" . "856105513800609792") ("screen_name" . "mbcladwell"))>
+
 
 
 (define (oauth2-post-tweet  text )
@@ -89,6 +109,12 @@
 	 
 	 )
 (oauth2-http-request tweet-request #:body data )))
+;;(oauth1-http-request tweet-request #:body data #:extra-headers '((User-Agent . "v2CreateTweetRuby")(Content-type . "application/json")  ))))
+
+;; curl -X POST https://api.twitter.com/2/tweets -H "Authorization: Bearer "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH" -H "Content-type: application/json" -d '{"text": "Hello World!"}'
+
+      
+
 
 (define (get-tweet-chunks txt lst size n counter)
   ;;txt whole tweet
@@ -130,9 +156,6 @@
   ;;https://developer.twitter.com/en/docs/authentication/oauth-1-0a/authorizing-a-request
   ;;https://developer.twitter.com/en/docs/authentication/oauth-1-0a/creating-a-signature
   (let* (
-	 (dummy (pretty-print text))
-	 (dummy (pretty-print reply-id))
-	 (dummy (pretty-print media-id))
 	 (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
 	 (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
  	 (uri  "https://api.twitter.com/1.1/statuses/update.json")
