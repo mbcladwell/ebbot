@@ -252,6 +252,7 @@
 
   (let* ((all-chunks (chunk-an-image img-file chunk-size ))
 	 (media-id (oauth1-upload-media-init  img-file))
+	 (_ (pretty-print (string-append "media-id: " media-id)))
 	 (dummy  (oauth1-upload-media-append-recurse  media-id all-chunks 0 ))
 	 (body  (receive (response body)		     
 		     (oauth1-upload-media-finalize media-id )

@@ -75,6 +75,8 @@
 	   (car lst)
 	  (find-by-id (cdr lst) id))))
 
+;; in /home/mbc/projects/ebbot
+;;guix shell -- guile -L . -e '(ebbot)' -s ebbot.scm /home/mbc/data/bernays 260
 
 (define (main args)
   ;; args: '( "working-dir" tweet-length )

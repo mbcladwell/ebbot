@@ -19,6 +19,7 @@
 	  *oauth-token-secret*
 	  *client-id*
 	  *client-secret*
+	  convert-to-encrypted
 	  ))
 
 
