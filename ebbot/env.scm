@@ -23,6 +23,7 @@
 	  *tweet-length*
 	  *working-dir*
 	  convert-to-encrypted
+	 ;; get-envs
 	  ))
 
 ;;working-dir determined by starting dir
@@ -40,7 +41,7 @@
 (define *tweet-length* #f)
 (define *data-dir* #f)
 
-
+;;(define (get-envs)
   (let*  ((p  (open-input-file  "./env.txt"))
  	  (a (get-string-all p))
 	  (b (base64-decode a))
@@ -56,8 +57,9 @@
       (set! *client-id* (assoc-ref varlst "client-id"))
       (set! *client-secret* (assoc-ref varlst "client-secret"))
       (set! *data-dir* (assoc-ref varlst "data-dir"))
-      (set! *tweet-length* (string->number (assoc-ref varlst "tweet-length")))
-      )
+      (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
+			       (string->number (assoc-ref varlst "tweet-length"))
+			       #f))
 
       ;;   (set! *oauth-consumer-key* (get-environment-variable "CONSUMER_KEY"))
       ;; (set! *oauth-consumer-secret* (get-environment-variable "CONSUMER_SECRET"))
@@ -68,12 +70,15 @@
       ;; (set! *client-secret* (get-environment-variable "CLIENT_SECRET")))
     )
   
-
-(define (convert-to-encrypted fin fout)
- (let* ((p  (open-input-file fin))
-	(bytes64  (base64-encode (get-bytevector-all p)))
-	(dummy (close-port p))
-	(p2  (open-output-file fout))	
+;;guix shell --manifest=manifest.scm -- guile -L /home/mbc/projects/ebbot  -e '(ebbot env)' -s ../../ebbot/ebbot/env.scm env-clear.txt env.txt
+;;(define (convert-to-encrypted fin fout)
+(define (main args)
+  (let* ((fin (cadr args))
+	 (fout (caddr args))
+	 (p  (open-input-file fin))
+	 (bytes64  (base64-encode (get-bytevector-all p)))
+	 (dummy (close-port p))
+	 (p2  (open-output-file fout))	
 	)	
     (put-string p2 bytes64)))
 

@@ -156,7 +156,7 @@
 
 
 (define (main args)
-  (let* (
+  (let* ( ;;(_ (get-envs))
 	  (counter (get-counter))
 	  (all-excerpts (get-all-excerpts-alist))
 	  (max-id (assoc-ref (car all-excerpts) "id"))
