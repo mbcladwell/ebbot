@@ -1,5 +1,6 @@
 (define-module (ebbot env) 
 #:use-module (srfi srfi-19) ;; date time
+#:use-module (srfi srfi-98) ;; env vars
 #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
 #:use-module (ice-9 rdelim)
 #:use-module (ice-9 popen)
@@ -19,8 +20,13 @@
 	  *oauth-token-secret*
 	  *client-id*
 	  *client-secret*
+	  *tweet-length*
+	  *working-dir*
 	  convert-to-encrypted
 	  ))
+
+;;working-dir determined by starting dir
+;;data-dir is in config json
 
 
 (define *oauth-consumer-key* #f)
@@ -30,12 +36,16 @@
 (define *oauth-token-secret* #f)
 (define *client-id* #f)
 (define *client-secret* #f)
+(define *working-dir* (getcwd))
+(define *tweet-length* #f)
+(define *data-dir* #f)
+
 
   (let*  ((p  (open-input-file  "./env.txt"))
  	  (a (get-string-all p))
 	  (b (base64-decode a))
 	  (varlst (json-string->scm (utf8->string b)))
-	  ;;(dummy (pretty-print varlst))
+	 ;; (dummy (pretty-print varlst))
 	  )
     (begin
       (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
@@ -44,10 +54,20 @@
       (set! *oauth-access-token* (assoc-ref varlst "oauth-access-token"))
       (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
       (set! *client-id* (assoc-ref varlst "client-id"))
-      (set! *client-secret* (assoc-ref varlst "client-secret"))))
+      (set! *client-secret* (assoc-ref varlst "client-secret"))
+      (set! *data-dir* (assoc-ref varlst "data-dir"))
+      (set! *tweet-length* (string->number (assoc-ref varlst "tweet-length")))
+      )
+
+      ;;   (set! *oauth-consumer-key* (get-environment-variable "CONSUMER_KEY"))
+      ;; (set! *oauth-consumer-secret* (get-environment-variable "CONSUMER_SECRET"))
+      ;; (set! *bearer-token* (get-environment-variable "BEARER_TOKEN"))
+      ;; (set! *oauth-access-token* (get-environment-variable "ACCESS_TOKEN"))
+      ;; (set! *oauth-token-secret* (get-environment-variable "TOKEN_SECRET"))
+      ;; (set! *client-id* (get-environment-variable "CLIENT_ID"))
+      ;; (set! *client-secret* (get-environment-variable "CLIENT_SECRET")))
+    )
   
-
-
 
 (define (convert-to-encrypted fin fout)
  (let* ((p  (open-input-file fin))

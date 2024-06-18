@@ -266,16 +266,16 @@
 
 
 
-(define (get-random-image dir)
-  ;;directory is (string-append working-dir "/random")
-  (let* ((all-files (list->vector (cddr (scandir dir)) )))
-   (vector-ref all-files (random (vector-length all-files) (seed->random-state (number->string (time-nanosecond (current-time)))))) ) )
+;; (define (get-random-image dir)
+;;   ;;directory is (string-append working-dir "/random")
+;;   (let* ((all-files (list->vector (cddr (scandir dir)) )))
+;;    (vector-ref all-files (random (vector-length all-files) (seed->random-state (number->string (time-nanosecond (current-time)))))) ) )
 
-(define (get-image directive working-dir)
-  (cond ((string=? directive "none") (#f))
-	((string=? directive "random")(string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/"))) )	
-	(else (string-append working-dir "/specific/" directive))
-     ))
+;; (define (get-image directive working-dir)
+;;   (cond ((string=? directive "none") (#f))
+;; 	((string=? directive "random")(string-append working-dir "/random/" (get-random-image (string-append working-dir "/random/"))) )	
+;; 	(else (string-append working-dir "/specific/" directive))
+;;      ))
   
 
 ;; (define (get-image directive working-dir)

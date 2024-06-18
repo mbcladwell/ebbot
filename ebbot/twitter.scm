@@ -31,12 +31,12 @@
  #:use-module (rnrs bytevectors)
  #:use-module (ice-9 textual-ports)
  #:use-module (ebbot image)
+ #:use-module (ebbot utilities)
  #:export (oauth2-post-tweet
 	   oauth1-post-tweet
 	   oauth2-post-tweet-recurse
 	   oauth1-post-tweet-recurse	   
-	   chunk-a-tweet
-	   get-nonce))
+	   ))
 
 
 ;; (define *oauth-consumer-key* "sHbODSbXeHaV6lV3HvGVRRmfD")
@@ -56,17 +56,6 @@
 (define *client-secret* (@@ (ebbot env) *client-secret*))
 
 
-(define nonce-chars (list->vector (string->list "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789")))
-
-(define (get-nonce n s)
-  "n is the length of the nonce
-   s is the nonce itself (a string)
-   therefore to use: (get-nonce 20 "")"
- (if (= n (string-length s))
-     s
-     (begin
-       (set! s (string-append s (string (vector-ref nonce-chars (random 58 (seed->random-state (number->string (time-nanosecond (current-time)))))) )))
-       (get-nonce n s))))
   	 
  (define-record-type <response-token>
   (make-response-token token_type access_token)
@@ -113,43 +102,8 @@
 
 ;; curl -X POST https://api.twitter.com/2/tweets -H "Authorization: Bearer "1516431938848006149-ZmM56NXft0k4rieBIH3Aj8A5727ALH" -H "Content-type: application/json" -d '{"text": "Hello World!"}'
 
-      
 
 
-(define (get-tweet-chunks txt lst size n counter)
-  ;;txt whole tweet
-  ;;size: # chars per chunk
-  ;;number of chunks
-  ;; (get-tweet-chunks "fjskdjk" '() 240 4 1)  start counter at 1 i.e. the first tweet
-  (if (= counter n)
-      (let*( (tweet (if (= n 1) txt
-			(string-append "@eddiebbot " (number->string counter) "/" (number->string n) " " txt))) )	
-	  (reverse (cons tweet lst)))
-      (let*((tweet1  (substring txt 0 size))
-	    (last-space-index (string-rindex tweet1 #\space))
-	    
-	    (tweet2  (if  (= counter 1)
-			 (string-append (number->string counter) "/" (number->string n) " " (substring tweet1 0 last-space-index))
-			 (string-append  "@eddiebbot " (number->string counter) "/" (number->string n) " " (substring tweet1 0 last-space-index))
-			 ))	    
-	    (rest-txt  (substring txt (+ last-space-index 1) (string-length txt)))
-	    (dummy (set! lst (cons tweet2 lst) ))
-	    (dummy (set! counter (+ counter 1)))
-	)  
-	(get-tweet-chunks rest-txt lst size n counter))
-  ))
-
-(define (chunk-a-tweet text size)
-  ;;text: the whole tweet
-  ;;size: size of chunks e.g. 280 for twitter
-  ;;Split a tweet >280 characters into multiple tweets and number 1/4, 2/4 etc.
-  ;;Since the number will take up 4 characters, you have 280 - 4 =276 characters per tweet
-  ;;return a list of the individual, numbered tweets in reverse order for tweeting
-  (let*((nchars (string-length text))
-	(size-mod (- size 4))
-	(ntweets (ceiling (/ nchars size-mod)))
-	)
-  (get-tweet-chunks text '() size-mod ntweets 1) ))
 
 
 (define (oauth1-post-tweet  text reply-id media-id)
@@ -158,8 +112,9 @@
   (let* (
 	 (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
 	 (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
- 	 (uri  "https://api.twitter.com/1.1/statuses/update.json")
+ 	 (uri  "https://api.twitter.com/2/tweets")
 	 (tweet-request (make-oauth-request uri 'POST '()))
+	 ;;(_ (pretty-print *oauth-consumer-secret*))
 	 (dummy (oauth-request-add-params tweet-request `( 
 	  						   (oauth_consumer_key . ,*oauth-consumer-key*)
 							   (oauth_nonce . ,(get-nonce 20 ""))
@@ -184,7 +139,12 @@
 	  (begin
 	    (receive (response body)	  
 		(oauth1-post-tweet (car lst) reply-id media-id)
-	       (set! counter (+ counter 1))
+	      (set! counter (+ counter 1))
+	      ;; (pretty-print (cdr lst))
+	      ;; (pretty-print (assoc-ref  (json-string->scm (utf8->string body)) "id_str"))
+	      ;; (pretty-print media-id)
+	      ;; (pretty-print counter)
+
 	     (oauth1-post-tweet-recurse  (cdr lst) (assoc-ref  (json-string->scm (utf8->string body)) "id_str")  media-id counter))			
 	     )
 	  (begin
