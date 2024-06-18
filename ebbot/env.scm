@@ -68,7 +68,7 @@
       ;; (set! *oauth-token-secret* (get-environment-variable "TOKEN_SECRET"))
       ;; (set! *client-id* (get-environment-variable "CLIENT_ID"))
       ;; (set! *client-secret* (get-environment-variable "CLIENT_SECRET")))
-    )
+    ))
   
 ;;guix shell --manifest=manifest.scm -- guile -L /home/mbc/projects/ebbot  -e '(ebbot env)' -s ../../ebbot/ebbot/env.scm env-clear.txt env.txt
 ;;(define (convert-to-encrypted fin fout)
