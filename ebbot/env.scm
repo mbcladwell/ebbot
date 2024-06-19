@@ -45,8 +45,11 @@
   (let*  ((p  (open-input-file  "./env.txt"))
  	  (a (get-string-all p))
 	  (b (base64-decode a))
-	  (varlst (json-string->scm (utf8->string b)))
-	 ;; (dummy (pretty-print varlst))
+	  (varlst (if b (json-string->scm (utf8->string b))
+		      '(("tweet-length" . "0")("data-dir" . "null")("client-secret"  .  "null")
+			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
+			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null")))
+	 ;; (_ (pretty-print (string-append "varlist: " varlst)) ;;varlst cannot be null for packaging purposes
 	  )
     (begin
       (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
@@ -57,9 +60,7 @@
       (set! *client-id* (assoc-ref varlst "client-id"))
       (set! *client-secret* (assoc-ref varlst "client-secret"))
       (set! *data-dir* (assoc-ref varlst "data-dir"))
-      (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
-			       (string->number (assoc-ref varlst "tweet-length"))
-			       #f))
+      (set! *tweet-length* (string->number (assoc-ref varlst "tweet-length")))
 
       ;;   (set! *oauth-consumer-key* (get-environment-variable "CONSUMER_KEY"))
       ;; (set! *oauth-consumer-secret* (get-environment-variable "CONSUMER_SECRET"))

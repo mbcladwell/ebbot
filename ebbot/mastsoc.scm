@@ -26,6 +26,7 @@
  #:export (
 	   mast-post-toot-curl-recurse
 	   mast-post-image-curl
+	   mastsoc-runner
 	   main
 	   ))
 
@@ -155,8 +156,8 @@
 	    (mast-post-toot-curl-recurse  (cdr lst) new-reply-id #f counter hashtags)))))
 
 
-(define (main args)
-  (let* ( ;;(_ (get-envs))
+(define (mastsoc-runner)
+(let* ( ;;(_ (get-envs))
 	  (counter (get-counter))
 	  (all-excerpts (get-all-excerpts-alist))
 	  (max-id (assoc-ref (car all-excerpts) "id"))
@@ -170,7 +171,11 @@
 	  (media-id (if image-file (mast-post-image-curl image-file) #f))
 	  (_ (set-counter new-counter)))
     (mast-post-toot-curl-recurse tweets #f media-id 0 hashtags)
-	 ))
+	 )
+  )
+
+(define (main args)
+ (mastsoc-runner))
 
 ;;;;;
 ;;unused
