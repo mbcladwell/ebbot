@@ -60,7 +60,9 @@
       (set! *client-id* (assoc-ref varlst "client-id"))
       (set! *client-secret* (assoc-ref varlst "client-secret"))
       (set! *data-dir* (assoc-ref varlst "data-dir"))
-      (set! *tweet-length* (string->number (assoc-ref varlst "tweet-length")))
+      (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
+			       (string->number (assoc-ref varlst "tweet-length"))
+			       #f))
 
       ;;   (set! *oauth-consumer-key* (get-environment-variable "CONSUMER_KEY"))
       ;; (set! *oauth-consumer-secret* (get-environment-variable "CONSUMER_SECRET"))
