@@ -42,14 +42,14 @@
 (define *data-dir* #f)
 
 ;;(define (get-envs)
-  (let*  ((p  (open-input-file  "./env.txt"))
- 	  (a (get-string-all p))
-	  (b (base64-decode a))
-	  (varlst (if b (json-string->scm (utf8->string b))
+  (let*  ((varlst (if (access?  "./env.txt" R_OK)
+		      (let* ((p  (open-input-file  "./env.txt"))
+ 			     (a (get-string-all p))
+			     (b (base64-decode a)))
+			(json-string->scm (utf8->string b)))
 		      '(("tweet-length" . "0")("data-dir" . "null")("client-secret"  .  "null")
 			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
 			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null"))))
-	 ;; (_ (pretty-print (string-append "varlist: " varlst)) ;;varlst cannot be null for packaging purposes
 	  )
     (begin
       (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
