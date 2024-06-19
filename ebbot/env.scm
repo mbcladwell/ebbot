@@ -48,7 +48,7 @@
 	  (varlst (if b (json-string->scm (utf8->string b))
 		      '(("tweet-length" . "0")("data-dir" . "null")("client-secret"  .  "null")
 			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
-			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null")))
+			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null"))))
 	 ;; (_ (pretty-print (string-append "varlist: " varlst)) ;;varlst cannot be null for packaging purposes
 	  )
     (begin
