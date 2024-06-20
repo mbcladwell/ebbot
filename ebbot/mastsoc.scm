@@ -40,7 +40,6 @@
 (define *client-secret* (@@ (ebbot env) *client-secret*))
 
 (define *working-dir* (@@ (ebbot env) *working-dir*))
-(define *data-dir* (@@ (ebbot env) *data-dir*))
 (define *tweet-length* (@@ (ebbot env) *tweet-length*))
 
 
@@ -52,6 +51,7 @@
 	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
 	(image (string-append "file='@" i "'"))
 	(out-file (get-rand-file-name "f" "txt"))
+	(_ (pretty-print (string-append "out file in post-image-curl: " out-file)))
 	(command (string-append "curl -o " out-file " -X POST -H " bearer " -H 'Content-Type: multipart/form-data' https://mastodon.social/api/v2/media --form " image))
 	(_ (system command))
 	(_ (sleep 3))

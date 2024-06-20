@@ -27,8 +27,6 @@
 	  ))
 
 ;;working-dir determined by starting dir
-;;data-dir is in config json
-
 
 (define *oauth-consumer-key* #f)
 (define *oauth-consumer-secret* #f)
@@ -39,7 +37,6 @@
 (define *client-secret* #f)
 (define *working-dir* (getcwd))
 (define *tweet-length* #f)
-(define *data-dir* #f)
 
 ;;(define (get-envs)
   (let*  ((varlst (if (access?  "./env.txt" R_OK)
@@ -47,7 +44,7 @@
  			     (a (get-string-all p))
 			     (b (base64-decode a)))
 			(json-string->scm (utf8->string b)))
-		      '(("tweet-length" . "0")("data-dir" . "null")("client-secret"  .  "null")
+		      '(("tweet-length" . "0")("client-secret"  .  "null")
 			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
 			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null"))))
 	  )
@@ -59,7 +56,6 @@
       (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
       (set! *client-id* (assoc-ref varlst "client-id"))
       (set! *client-secret* (assoc-ref varlst "client-secret"))
-      (set! *data-dir* (assoc-ref varlst "data-dir"))
       (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
 			       (string->number (assoc-ref varlst "tweet-length"))
 			       #f))
