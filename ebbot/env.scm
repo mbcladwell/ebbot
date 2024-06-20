@@ -23,7 +23,7 @@
 	  *tweet-length*
 	  *working-dir*
 	  convert-to-encrypted
-	 ;; get-envs
+	  main
 	  ))
 
 ;;working-dir determined by starting dir
@@ -73,7 +73,10 @@
       ;; (set! *client-secret* (get-environment-variable "CLIENT_SECRET")))
     ))
   
-;;guix shell --manifest=manifest.scm -- guile -L /home/mbc/projects/ebbot  -e '(ebbot env)' -s ../../ebbot/ebbot/env.scm env-clear.txt env.txt
+;;guix shell --manifest=manifest.scm -- guile -L /home/mbc/projects/ebbot  -e '(ebbot env)' -s /home/mbc/projects/ebbot/ebbot/env.scm env-clear.txt env.txt
+
+;;guile -L /home/mbc/projects/ebbot  -e '(ebbot env)' -s /home/mbc/projects/ebbot/ebbot/env.scm env-clear-template.txt env.txt
+
 ;;(define (convert-to-encrypted fin fout)
 (define (main args)
   (let* ((fin (cadr args))
