@@ -14,7 +14,8 @@
   #:use-module (ice-9 string-fun)  ;;string-replace-substring
   #:use-module (ice-9 pretty-print)
   #:use-module (json)
-  #:use-module (ice-9 textual-ports))
+  #:use-module (ice-9 textual-ports)
+  #:export (main))
 
 ;;input: a text file with quotes that are delimitted by <CR><LF>
 ;;output: a json that is appropriate for consing to the json database. The quotes will be annotated with source, and image if available.
