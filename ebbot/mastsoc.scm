@@ -51,7 +51,9 @@
 	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
 	(image (string-append "file='@" i "'"))
 	(out-file (get-rand-file-name "f" "txt"))
-	(_ (pretty-print (string-append "out file in post-image-curl: " out-file)))
+	(_ (pretty-print (string-append " *wd* in post-image-curl: " *working-dir*)))
+	(_ (pretty-print (string-append "getcwd in post-image-curl: " (getcwd))))
+	
 	(command (string-append "curl -o " out-file " -X POST -H " bearer " -H 'Content-Type: multipart/form-data' https://mastodon.social/api/v2/media --form " image))
 	(_ (system command))
 	(_ (sleep 3))
