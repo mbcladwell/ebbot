@@ -1,4 +1,4 @@
-(define-module (babweb lib env) 
+(define-module (ebbot env) 
 #:use-module (srfi srfi-19) ;; date time
 #:use-module (srfi srfi-98) ;; env vars
 #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -12,7 +12,7 @@
 #:use-module (rnrs io ports)
 ;#:use-module (ice-9 textual-ports)
 #:use-module (gcrypt base64)
-#:use-module (babweb lib utilities)
+#:use-module (ebbot utilities)
 #:export ( 
 	  *oauth-consumer-key*
 	  *oauth-consumer-secret*
@@ -101,7 +101,7 @@
 
 ;;guix shell --manifest=manifest.scm -- guile -L /home/mbc/projects/ebbot  -e '(ebbot env)' -s /home/mbc/projects/ebbot/ebbot/env.scm env-clear.txt env.txt
 
-;;guile -L /home/mbc/projects/babweb -e '(babweb lib env)' -s /home/mbc/projects/babweb/babweb/lib/env.scm env-clear-template.txt env.txt
+;;guile -L /home/mbc/projects/babweb -e '(ebbot env)' -s /home/mbc/projects/babweb/babweb/lib/env.scm env-clear-template.txt env.txt
 
 ;;(define (convert-to-encrypted fin fout)
 ;; (define (main args)
@@ -114,7 +114,7 @@
 ;; 	)	
 ;;     (put-string p2 bytes64)))
 
-;;guile -L /home/mbc/projects/babweb -e '(babweb lib env)' -s /home/mbc/projects/babweb/babweb/lib/env.scm env-clear-template.txt
+;;guile -L /home/mbc/projects/babweb -e '(ebbot env)' -s /home/mbc/projects/babweb/babweb/lib/env.scm env-clear-template.txt
 (define (main args)
   (let* ((fin (cadr args))
 	 (p  (open-input-file fin))

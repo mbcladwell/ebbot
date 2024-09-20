@@ -1,5 +1,5 @@
-(define-module (babweb lib twitter-oauth1) 
-#:use-module (babweb lib env)
+(define-module (ebbot twitter-oauth1) 
+#:use-module (ebbot env)
  #:use-module (web client)
  #:use-module (srfi srfi-19) ;; date time
  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -30,8 +30,8 @@
  #:use-module (oauth oauth1 signature)
  #:use-module (rnrs bytevectors)
  #:use-module (ice-9 textual-ports)
- #:use-module (babweb lib image)
- #:use-module (babweb lib utilities)
+ #:use-module (ebbot image)
+ #:use-module (ebbot utilities)
  #:export ( main
 	   ))
 
@@ -101,7 +101,7 @@
   ;;oauth_token is the token from get-request-token
   ;;oauth-verifier is the pin manually copied from the ____ page
   ;;output is a 'response object' as with get-request-token
-  (let* ((_ (pretty-print (string-append "guile -L /home/mbc/projects/babweb -L /home/mbc/projects/guile-oauth -e '(babweb lib twitter)' -s /home/mbc/projects/babweb/babweb/lib/twitter.scm " oauth_tokenv " " oauth-verifierv)))
+  (let* ((_ (pretty-print (string-append "guile -L /home/mbc/projects/babweb -L /home/mbc/projects/guile-oauth -e '(ebbot twitter)' -s /home/mbc/projects/babweb/babweb/lib/twitter.scm " oauth_tokenv " " oauth-verifierv)))
 	 (_ (pretty-print (string-append "in get-access-token: " oauth-verifierv)))
 	 (uri "https://api.twitter.com/oauth/access_token")
 	 (verifier-request (make-oauth-request uri 'POST '()))
@@ -215,7 +215,7 @@
 	      ))  ))
        
 
-;; guile -L /home/mbc/projects/babweb  -e '(babweb lib twitter)' -s /home/mbc/projects/babweb/babweb/lib/twitter.scm 
+;; guile -L /home/mbc/projects/babweb  -e '(ebbot twitter)' -s /home/mbc/projects/babweb/babweb/lib/twitter.scm 
 (define (main args)
   ;;arg1 is consumer_key
   ;;arg2 is consumer_secret

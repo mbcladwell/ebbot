@@ -1,4 +1,4 @@
-(define-module (babweb lib utilities) 
+(define-module (ebbot utilities) 
  #:use-module (srfi srfi-19) ;; date time
  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
  #:use-module (srfi srfi-9)  ;;records
@@ -13,7 +13,7 @@
  #:use-module (rnrs bytevectors )
 ;; #:use-module (rnrs io ports #:select ())
  #:use-module (ice-9 textual-ports)
- #:use-module (babweb lib env)
+ #:use-module (ebbot env)
  #:use-module (ice-9 ftw);;scandir
  #:export (get-rand-file-name
 	   add-two-lists

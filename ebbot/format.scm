@@ -1,4 +1,4 @@
-(define-module (babweb lib format) 
+(define-module (ebbot format) 
   #:use-module (web client)
   #:use-module (srfi srfi-19) ;; date time
   #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -15,7 +15,7 @@
   #:use-module (ice-9 pretty-print)
   #:use-module (json)
   #:use-module (ice-9 textual-ports)
-  #:use-module (babweb lib html)
+  #:use-module (ebbot html)
   #:export (main))
 
 ;;input: a text file with quotes that are delimitted by <CR><LF>
@@ -84,7 +84,7 @@
   (close-port p)))
 
 
-;;/gnu/store/pm4swxzzcz77li6xgsf9xl2rskk4228r-guile-next-3.0.9-0.3b76a30/bin/guile -L /home/mbc/projects/babweb -e '(babweb lib format)' -s /home/mbc/projects/babweb/babweb/lib/format.scm . destination.txt
+;;/gnu/store/pm4swxzzcz77li6xgsf9xl2rskk4228r-guile-next-3.0.9-0.3b76a30/bin/guile -L /home/mbc/projects/babweb -e '(ebbot format)' -s /home/mbc/projects/babweb/babweb/lib/format.scm . destination.txt
 
 (define (main args)
   ;; args: '( "working-dir" "new-excerpts-file-name"  )

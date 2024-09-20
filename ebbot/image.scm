@@ -1,4 +1,4 @@
-(define-module (babweb lib image) 
+(define-module (ebbot image) 
  #:use-module (web client)
 #:use-module (srfi srfi-19) ;; date time
 #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -33,9 +33,9 @@
 #:use-module (rnrs io ports)
 #:use-module (ice-9 textual-ports)
 #:use-module (gcrypt base64)
-#:use-module (babweb lib env)
-#:use-module (babweb lib twitter)
-#:use-module (babweb lib utilities)
+#:use-module (ebbot env)
+#:use-module (ebbot twitter)
+#:use-module (ebbot utilities)
 ;;#:use-module (ebbot)
 
 #:export (upload-image
@@ -50,13 +50,13 @@
 ;; (define *client-id* "SU1SQUh1a2VWNU5GQjFFT2hzLWU6MTpjaQ")
 ;; (define *client-secret* "ZZGJ5kPWnnkqCtqls8HJDGwyKKAi6cf6TbKnDY7XCzPQQN-pIy")
 
-(define *oauth-consumer-key* (@@ (babweb lib env) *oauth-consumer-key*))
-(define *oauth-consumer-secret* (@@ (babweb lib env) *oauth-consumer-secret*))
-(define *bearer-token* (@@ (babweb lib env) *bearer-token*))  ;;this does not change
-(define *oauth-access-token* (@@ (babweb lib env) *oauth-access-token*))
-(define *oauth-token-secret* (@@ (babweb lib env) *oauth-token-secret*))
-(define *client-id* (@@ (babweb lib env) *client-id*))
-(define *client-secret* (@@ (babweb lib env) *client-secret*))
+(define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
+(define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
+(define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
+(define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
+(define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
+(define *client-id* (@@ (ebbot env) *client-id*))
+(define *client-secret* (@@ (ebbot env) *client-secret*))
 
 
 (define (oauth1-upload-media-finalize media-id )

@@ -1,5 +1,5 @@
-(define-module (babweb lib twitter) 
- #:use-module (babweb lib env)
+(define-module (ebbot twitter) 
+ #:use-module (ebbot env)
  #:use-module (web client)
  #:use-module (srfi srfi-19) ;; date time
  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -30,8 +30,8 @@
  #:use-module (oauth oauth1 signature)
  #:use-module (rnrs bytevectors)
  #:use-module (ice-9 textual-ports)
- #:use-module (babweb lib image)
- #:use-module (babweb lib utilities)
+ #:use-module (ebbot image)
+ #:use-module (ebbot utilities)
  #:export (oauth2-post-tweet
 	   oauth2-post-tweet-recurse
 	   get-request-token
@@ -312,7 +312,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; guix shell -m manifest.scm -- guile -L /home/mbc/projects/babweb  -e '(babweb lib twitter)' -s /home/mbc/projects/babweb/babweb/lib/twitter.scm 
+;; guix shell -m manifest.scm -- guile -L /home/mbc/projects/babweb  -e '(ebbot twitter)' -s /home/mbc/projects/babweb/babweb/lib/twitter.scm 
 
 (define (main args)
   (let* ((counter (get-counter))
