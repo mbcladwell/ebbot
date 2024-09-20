@@ -1,5 +1,4 @@
 #! /bin/bash
-export LC_ALL="C"
 export GUILE_LOAD_PATH="/home/mbc/projects/ebbot${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"
 ./clean.sh
 guix package --install-from-file=guix.scm
