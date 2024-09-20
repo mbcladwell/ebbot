@@ -51,6 +51,18 @@
 
 (define oauth-response-token-record (make-response-token "bearer" *oauth-access-token* ))
 
+(define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
+(define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
+(define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
+(define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
+(define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
+(define *client-id* (@@ (ebbot env) *client-id*))
+(define *client-secret* (@@ (ebbot env) *client-secret*))
+
+(define *working-dir* (@@ (ebbot env) *working-dir*))
+(define *tweet-length* (@@ (ebbot env) *tweet-length*))
+
+
 ;#<<oauth1-response> token: "856105513800609792-ttQfcoxgrGJnwaLfjEdyagDjL9lfbTP" secret: "EfoSSaCHSnmfkhfU2r5oiU03cA6Kb6SLLAr7rxZO73Tfg" params: (("user_id" . "856105513800609792") ("screen_name" . "mbcladwell"))>
 
 
@@ -312,7 +324,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; guix shell -m manifest.scm -- guile -L /home/mbc/projects/babweb  -e '(ebbot twitter)' -s /home/mbc/projects/babweb/babweb/lib/twitter.scm 
+;; guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot  -e '(ebbot twitter)' -s /home/mbc/projects/ebbot/ebbot/twitter.scm 
 
 (define (main args)
   (let* ((counter (get-counter))

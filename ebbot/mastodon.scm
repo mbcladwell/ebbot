@@ -87,16 +87,16 @@
 ;;   )
 
 
-(define (mast-post-toot-curl t i)
-  (let*((media-id (mast-post-image-curl i))
-	(status (string-append " -F 'status=" t "'"))
-	(pref "curl https://mastodon.social/api/v1/statuses -H 'Authorization: Bearer dFe6j-65kVREIqyJs7RSmn23GeFBEU4_Qb2Nln_z_Lw' -F 'media_ids[]=")
-	(suff "'")
-	(command (string-append pref media-id status))
-	(_ (pretty-print command))
-	)
-  (system command)  )
-  )
+;; (define (mast-post-toot-curl t i)
+;;   (let*((media-id (mast-post-image-curl i))
+;; 	(status (string-append " -F 'status=" t "'"))
+;; 	(pref "curl https://mastodon.social/api/v1/statuses -H 'Authorization: Bearer dFe6j-65kVREIqyJs7RSmn23GeFBEU4_Qb2Nln_z_Lw' -F 'media_ids[]=")
+;; 	(suff "'")
+;; 	(command (string-append pref media-id status))
+;; 	(_ (pretty-print command))
+;; 	)
+;;   (system command)  )
+;;   )
 
 ;; curl -X POST \
 ;; 	-F 'client_id=your_client_id_here' \
@@ -128,16 +128,18 @@
   ;;i: media-id or #f
   ;;r: reply-id or #f
   (let*(;;(media-id (mast-post-image-curl i))
+	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
 	(media (if i (string-append "' --data-binary 'media_ids[]=" i ) ""))
 	(reply (if r (string-append "' --data-binary 'in_reply_to_id=" r ) ""))
 	(suffix "'")
 	(out-file (get-rand-file-name "f" "txt"))
-	(command (string-append "curl -o " out-file " https://mastodon.social/api/v1/statuses -H 'Authorization: Bearer dFe6j-65kVREIqyJs7RSmn23GeFBEU4_Qb2Nln_z_Lw' --data-binary 'status=" t media reply suffix))
+	(command (string-append "curl -o " out-file " https://mastodon.social/api/v1/statuses -H " bearer " --data-binary 'status=" t media reply suffix))
 	(_ (system command))
 	(_ (sleep 3))
 	(p  (open-input-file out-file))
 	(lst  (json-string->scm (get-string-all p)))
-;;      	(in (open-pipe*  OPEN_READ "curl" "-v" "-o" out-file "-H" bearer "-X" "POST" "-H" "'Content-Type: multipart/form-data'" "https://mastodon.social/api/v2/media" "--form" image))
+	;;      	(in (open-pipe*  OPEN_READ "curl" "-v" "-o" out-file "-H" bearer "-X" "POST" "-H" "'Content-Type: multipart/form-data'" "https://mastodon.social/api/v2/media" "--form" image))
+	;;(_ (pretty-print lst))
 	(id (assoc-ref lst "id"))
 	(_ (delete-file out-file))
 ;;	(_ (pretty-print (string-append "post id: " id)))
@@ -158,6 +160,7 @@
 		 )
 	      ;; (pretty-print (cdr lst))
 	      ;; (pretty-print (assoc-ref  (json-string->scm (utf8->string body)) "id_str"))
+	       ;; (pretty-print  (json-string->scm (utf8->string body)))
 	      ;; (pretty-print media-id)
 	      ;; (pretty-print counter)
 
@@ -181,10 +184,13 @@
 	  (media-directive (assoc-ref entity "image"))
 	  (image-file (if (string=? media-directive "none") #f (get-image-file-name media-directive)))
 	  (media-id (if image-file (mast-post-image-curl image-file) #f))
+	 ;; (_ (pretty-print media-id))
 	  (_ (set-counter new-counter)))
     (mast-post-toot-curl-recurse tweets #f media-id 0 hashtags)
 	 )
   )
+
+;;guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm
 
 (define (main args)
  (mastodon-runner))
@@ -193,28 +199,28 @@
 ;;unused
 ;;;
 
-(define (mast-oauth2-get-access )
-  (let* (
-	;; (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
-	;; (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
-	;; (data (string-append "{\"text\": \"" text "\"}"))
- 	 (uri  "https://mastodon.social/oauth/token")
-	 (tweet-request (make-oauth-request uri 'POST '()))
-	 (dummy (oauth-request-add-params tweet-request `( 
-	  						  (client_id . ,*oauth-consumer-key*)
-							  (client_secret . ,(get-nonce 20 ""))
-							  (redirect_uri . "urn:ietf:wg:oauth:2.0:oob")
+;; (define (mast-oauth2-get-access )
+;;   (let* (
+;; 	;; (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
+;; 	;; (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
+;; 	;; (data (string-append "{\"text\": \"" text "\"}"))
+;;  	 (uri  "https://mastodon.social/oauth/token")
+;; 	 (tweet-request (make-oauth-request uri 'POST '()))
+;; 	 (dummy (oauth-request-add-params tweet-request `( 
+;; 	  						  (client_id . ,*oauth-consumer-key*)
+;; 							  (client_secret . ,(get-nonce 20 ""))
+;; 							  (redirect_uri . "urn:ietf:wg:oauth:2.0:oob")
 							
-							   (grant_type . "authorization_code")
-							   (code . ,*authorization-code*)
-							   (scope . "write:statuses")
-							  ; (Content-type . "application/json")
-							  ; (json . ,data)
-							   )))
-;;	 (dummy (oauth1-request-sign tweet-request credentials oauth1-response #:signature oauth1-signature-hmac-sha1))
-;;	 (dummy (oauth-request-add-param tweet-request 'content-type "application/json"))
-;;	 (dummy (oauth-request-add-param tweet-request 'Authorization "Bearer"))
-;;	 (dummy (oauth-request-add-param tweet-request 'scope "tweet.write"))
+;; 							   (grant_type . "authorization_code")
+;; 							   (code . ,*authorization-code*)
+;; 							   (scope . "write:statuses")
+;; 							  ; (Content-type . "application/json")
+;; 							  ; (json . ,data)
+;; 							   )))
+;; ;;	 (dummy (oauth1-request-sign tweet-request credentials oauth1-response #:signature oauth1-signature-hmac-sha1))
+;; ;;	 (dummy (oauth-request-add-param tweet-request 'content-type "application/json"))
+;; ;;	 (dummy (oauth-request-add-param tweet-request 'Authorization "Bearer"))
+;; ;;	 (dummy (oauth-request-add-param tweet-request 'scope "tweet.write"))
 	 
-	 )
-    #f))
+;; 	 )
+;;     #f))
