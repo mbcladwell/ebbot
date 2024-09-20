@@ -125,8 +125,8 @@
     ))
 
 ;;with everything in the store, you must place a subdir ebbot with env.scm which then has
-;;to be first in GUILE_LOAD_PATH ::   export GUILE_LOAD_PATH="/home/mbc/projects/mastsoc/test${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"x
-;;guix shell --manifest=manifest.scm -- guile  -e '(ebbot mastsoc)' -s /home/mbc/.guix-profile/share/guile/site/3.0/ebbot/mastsoc.scm
+;;to be first in GUILE_LOAD_PATH ::   export GUILE_LOAD_PATH="/home/mbc/projects/mastodon/test${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"x
+;;guix shell --manifest=manifest.scm -- guile  -e '(ebbot mastodon)' -s /home/mbc/.guix-profile/share/guile/site/3.0/ebbot/mastodon.scm
 
 ;;gpg --output envs --encrypt --recipient babweb@build-a-bot.biz env-clear-template.txt
 ;;gpg --output e-clear.txt --decrypt envs
