@@ -22,6 +22,16 @@
  #:use-module (ice-9 textual-ports)
  #:use-module (ebbot image)
  #:use-module (ebbot utilities)
+ #:use-module (oauth oauth1)
+ #:use-module (oauth oauth2)
+ #:use-module (oauth oauth2 request)
+ #:use-module (oauth oauth2 response)
+ #:use-module (oauth utils)
+ #:use-module (oauth request)
+ #:use-module (oauth oauth1 client)
+ #:use-module (oauth oauth1 utils)
+ #:use-module (oauth oauth1 credentials)
+ #:use-module (oauth oauth1 signature)
  
  #:export (
 	   mast-post-toot-curl-recurse
