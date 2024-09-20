@@ -1,4 +1,4 @@
-(define-module (ebbot utilities) 
+(define-module (babweb lib utilities) 
  #:use-module (srfi srfi-19) ;; date time
  #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
  #:use-module (srfi srfi-9)  ;;records
@@ -10,11 +10,13 @@
  #:use-module (ice-9 string-fun)  ;;string-replace-substring
  #:use-module (ice-9 pretty-print)
  #:use-module (json)
- #:use-module (rnrs bytevectors)
+ #:use-module (rnrs bytevectors )
+;; #:use-module (rnrs io ports #:select ())
  #:use-module (ice-9 textual-ports)
- #:use-module (ebbot env)
+ #:use-module (babweb lib env)
  #:use-module (ice-9 ftw);;scandir
  #:export (get-rand-file-name
+	   add-two-lists
 	   chunk-a-tweet
 	   get-counter
 	   set-counter
@@ -22,11 +24,29 @@
 	   get-all-excerpts-alist
 	   get-all-hashtags-string
 	   get-nonce
-	   get-image-file-name))
+	   get-next-val-param
+	   get-image-file-name
+	   get-expired
+	   encrypt-alist
+	   decrypt-alist
+	   envs-report
+	   lst-to-query-string
+	   call-command-with-output-to-string))
 
-(define *working-dir* (@@ (ebbot env) *working-dir*))
-(define *tweet-length* (@@ (ebbot env) *tweet-length*))
-(define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
+
+(define (add-two-lists lst base id)
+  ;;lst: new elements to be added; monitor this for null
+  ;;base: base list i.e. the db
+  ;;id: starting id (a number)
+  (if (null? (cdr lst))
+      (let*(
+	    (a  (assoc-set! (car lst) "id" id))	   
+	    (dummy  (set! base (cons a base) )))
+	base)
+      (let*((a  (assoc-set! (car lst) "id" id))
+	    (dummy  (set! base (cons a base) ))
+	    (dummy (set! id (+ id 1))))
+	(add-two-lists (cdr lst) base id))))
 
 
 (define nonce-chars (list->vector (string->list "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789")))
@@ -48,19 +68,35 @@
   ;;counter is the last tweeted id
   ;;start with (+ counter 1) for this session
   (let* (
-	 (p  (open-input-file (string-append *working-dir* "/last-posted.json")))
+	 (p  (open-input-file (string-append *data-dir* "/last-posted.json")))
 	 (a (json-string->scm (get-string-all p)))
 	 (dummy (close-port p))
 	 (b (assoc-ref a "last-posted-id")))
     b))
 
 (define (set-counter x)
-(let* ((p  (open-output-file (string-append *working-dir* "/last-posted.json")))
+(let* ((p  (open-output-file (string-append *data-dir* "/last-posted.json")))
 	 (a (scm->json-string `(("last-posted-id" . ,x))))
 	 (dummy (put-string p a)))
   (close-port p)))
 
+(define (my-last lst)
+  (if (null? (cdr lst))
+      (car lst)
+      (my-last (cdr lst))))
 
+(define (get-next-val-param lst param val)
+  ;;get the max value for a parameter e.g. id so
+  ;;the next id can be assigned
+  ;;assume a string in a json so convert to integer
+  ;;usage (get-max-val-param lst param 0)
+  (if (null? (cdr lst))
+      (begin
+	(set! val (max (string->number (assoc-ref (car lst) param)) val))
+	(number->string (+ val 1)))
+      (begin
+	(set! val (max (string->number (assoc-ref (car lst) param)) val))
+      (get-next-val-param (cdr lst) param val))))
 
 
 (define (get-tweet-chunks txt lst size n counter)
@@ -99,7 +135,7 @@
   (get-tweet-chunks text '() size-mod ntweets 1) ))
 
 (define (get-all-excerpts-alist)
-  (let* ((p  (open-input-file (string-append *working-dir* "/db.json")))
+  (let* ((p  (open-input-file (string-append *data-dir* "/db.json")))
 	 (a (vector->list (json-string->scm (get-string-all p)))))	
      a))
 
@@ -114,7 +150,7 @@
 
 (define (get-all-hashtags-string)
   ;;hashtags stored with #
-  (let* ((p  (open-input-file (string-append *working-dir* "/hashtags.json")))
+  (let* ((p  (open-input-file (string-append *data-dir* "/hashtags.json")))
 	 (a (vector->list (assoc-ref (json-string->scm (get-string-all p)) "hashtags"))))	
      (string-join (add-hash-recurse a '()))))
 
@@ -137,6 +173,67 @@
 
 (define (get-image-file-name directive)
   (cond ((string=? directive "none") (#f))
-	((string=? directive "random")(string-append *working-dir* "/random/" (get-random-image (string-append *working-dir* "/random/"))) )	
-	(else (string-append *working-dir* "/specific/" directive))
+	((string=? directive "random")(string-append *data-dir* "/random/" (get-random-image (string-append *data-dir* "/random/"))) )	
+	(else (string-append *data-dir* "/specific/" directive))
      ))
+
+(define (get-expired expires-in)
+  ;;expires-in: how many seconds before expiration; an integer
+  (+ (time-second (current-time))   expires-in))
+
+
+(define (encrypt-alist alist fname)
+  (let* ((json-string (scm->json-string alist))
+	 (out-file (get-rand-file-name "f" "txt"))
+	 (p  (open-output-file out-file))
+	 (command (string-append "gpg --output " fname " --encrypt --recipient " *gpg-key* " " out-file)))
+  (begin
+    (put-string p json-string)
+    (force-output p)
+    (close-port p)
+    (system command)
+    (delete-file out-file)
+    )))
+
+(define (decrypt-alist fname)
+  (let* ((out-file (get-rand-file-name "f" "txt"))
+	 (command  (string-append "gpg --output " out-file " --decrypt " fname))
+	 (_ (system command))
+	 (p  (open-input-file  out-file))
+	 (a (get-string-all p))
+	 (_ (delete-file out-file)))
+    (json-string->scm  a)))
+  
+(define (lst-to-query-string lst s)
+  ;;start with (lst-to-query-string lst "?")
+  (if (null? (cdr lst))
+      (begin 
+	(set! s (string-append s (caar lst) "=" (cadar lst)))
+	s)
+      (begin
+	(set! s (string-append s (caar lst) "=" (cadar lst) "&"))
+	(lst-to-query-string (cdr lst) s))))
+
+(define (envs-report file-name)
+  (let* ( (vals (decrypt-alist file-name))
+	  (expired (assoc-ref vals "expired"))
+	  (remaining (if expired (- expired (time-second (current-time))) #f))	 
+	  )
+    (begin
+      (pretty-print  vals)
+      (if remaining (pretty-print (string-append "remaining: " (number->string remaining ) "  [negative indicates expired]")))
+      )))
+
+(define (call-command-with-output-to-string cmd)
+  ;;(import (ice-9 rdelim) (ice-9 popen) (rnrs io ports))
+  ;;https://www.draketo.de/software/guile-capture-stdout-stderr.html
+  (let* ((out-cons (pipe))
+         (port (with-output-to-port (cdr out-cons)
+                 (lambda() (open-input-pipe cmd))))
+         (_ (setvbuf (car out-cons) 'block 
+             (* 1024 1024 16)))
+         (result (read-delimited "" port)))
+    (close-port (cdr out-cons))
+    (values
+     result
+     (read-delimited "" (car out-cons)))))

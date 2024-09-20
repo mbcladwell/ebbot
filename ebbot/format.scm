@@ -1,4 +1,4 @@
-(define-module (ebbot format) 
+(define-module (babweb lib format) 
   #:use-module (web client)
   #:use-module (srfi srfi-19) ;; date time
   #:use-module (srfi srfi-1)  ;;list searching; delete-duplicates in list 
@@ -15,12 +15,15 @@
   #:use-module (ice-9 pretty-print)
   #:use-module (json)
   #:use-module (ice-9 textual-ports)
+  #:use-module (babweb lib html)
   #:export (main))
 
 ;;input: a text file with quotes that are delimitted by <CR><LF>
 ;;output: a json that is appropriate for consing to the json database. The quotes will be annotated with source, and image if available.
 
 ;; database fields: id, content, image
+
+;;https://dthompson.us/posts/rendering-html-with-sxml-and-gnu-guile.html
 
 (define working-dir "")
 (define db "/db.json")                   ;;the database that provides quotes for tweets and is processed through
@@ -32,6 +35,19 @@
     	 (all-quotes   (string-split  (get-string-all p) #\newline)))    
     all-quotes))
 
+(define (clean-chars s)
+  ;;remove offensive characters
+  (let* ((out (string-replace-substring s "'" "%27"))
+	 (out (string-replace-substring out "’" "%27"))
+	 (out (string-replace-substring out "\"" "%22"))
+	 (out (string-replace-substring out "“" "%22"))
+	 (out (string-replace-substring out "”" "%22"))
+	 (out (string-replace-substring out "…" "..."))
+
+	 )
+    out))
+
+
 
 (define (process-quotes old new counter )
   ;; old: original list
@@ -41,12 +57,12 @@
   (if (null? (cdr old))
       (begin
 	(if (> (string-length (car old)) 2)
-	(set! new (cons `(,(cons "content"  (car old)) ("image" . ,(cadr old))  ("id" . ,counter)) new)))
+	(set! new (cons `(,(cons "content"  (clean-chars (car old))) ("image" . ,(cadr old))  ("id" . ,counter)) new)))
 	new)
       (begin
 	(if (> (string-length (car old)) 2)
-	    (begin
-	      (set! new (cons `(,(cons "content" (car old)) ("image" . ,(cadr old))("id" . ,counter)) new))
+	    (begin	
+	      (set! new (cons `(,(cons "content" (clean-chars (car old))) ("image" . ,(cadr old))("id" . ,counter)) new))
 	      (set! counter (+ 1 counter))))
 	(process-quotes (cddr old) new counter ))
       ))
@@ -68,6 +84,7 @@
   (close-port p)))
 
 
+;;/gnu/store/pm4swxzzcz77li6xgsf9xl2rskk4228r-guile-next-3.0.9-0.3b76a30/bin/guile -L /home/mbc/projects/babweb -e '(babweb lib format)' -s /home/mbc/projects/babweb/babweb/lib/format.scm . destination.txt
 
 (define (main args)
   ;; args: '( "working-dir" "new-excerpts-file-name"  )
@@ -75,7 +92,6 @@
 	 (dummy (set! working-dir (cadr args)))
 	; (counter (get-counter))
 	 (all-new-quotes (get-all-new-quotes (string-append working-dir "/" (caddr args))))
-
 	 ;;used when appending
 	 ;(last-id (get-last-id))
 	;(start (if (= last-id 0) 0 (+ last-id 1)))  ;;record to start populating
@@ -85,7 +101,7 @@
 	 (stop-time (current-time time-monotonic))
 	 (elapsed-time (ceiling (/ (time-second (time-difference stop-time start-time)) 60)))
 	 )
-   (pretty-print new-list)    
+   (pretty-print all-new-quotes)    
    ;; (pretty-print (string-append "Elapsed time: " (number->string  elapsed-time) " minutes." ))
    ;; #f
     ))
