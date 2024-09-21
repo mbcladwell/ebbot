@@ -49,7 +49,7 @@
 (define *client-id* (@@ (ebbot env) *client-id*))
 (define *client-secret* (@@ (ebbot env) *client-secret*))
 
-(define *working-dir* (@@ (ebbot env) *working-dir*))
+(define *data-dir* (@@ (ebbot env) *data-dir*))
 (define *tweet-length* (@@ (ebbot env) *tweet-length*))
 
 

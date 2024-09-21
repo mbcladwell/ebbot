@@ -59,7 +59,7 @@
 (define *client-id* (@@ (ebbot env) *client-id*))
 (define *client-secret* (@@ (ebbot env) *client-secret*))
 
-(define *working-dir* (@@ (ebbot env) *working-dir*))
+(define *data-dir* (@@ (ebbot env) *data-dir*))
 (define *tweet-length* (@@ (ebbot env) *tweet-length*))
 
 
@@ -333,6 +333,8 @@
 	 (new-counter (if (= counter max-id) 0 (+ counter 1)))
          (entity (find-by-id all-excerpts new-counter))
 	 (_ (pretty-print *tweet-length*))
+	 (_ (pretty-print *data-dir*))
+	 
 	 (tweets (chunk-a-tweet (assoc-ref entity "content") *tweet-length*))
 	 (hashtags (get-all-hashtags-string))
 	 (media-directive (assoc-ref entity "image"))
