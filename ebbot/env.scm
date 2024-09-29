@@ -14,21 +14,22 @@
 #:use-module (gcrypt base64)
 #:use-module (ebbot utilities)
 #:export ( 
-	  *oauth-consumer-key*
-	  *oauth-consumer-secret*
-	  *bearer-token*
-	  *oauth-access-token*
-	  *oauth-token-secret*
-	  *client-id*
-	  *client-secret*
-	  *tweet-length*
-	  *working-dir*
-	  *data-dir*
-	  *redirecturi*
-	  *platform*
-	  *gpg-key*
-	  convert-to-encrypted
-	  main
+	  ;; *oauth-consumer-key*
+	  ;; *oauth-consumer-secret*
+	  ;; *bearer-token*
+	  ;; *oauth-access-token*
+	  ;; *oauth-token-secret*
+	  ;; *client-id*
+	  ;; *client-secret*
+	  ;; *tweet-length*
+	  ;; *working-dir*
+	  ;; *data-dir*
+	  ;; *redirecturi*
+	  ;; *platform*
+	  ;; *gpg-key*
+	  ;; convert-to-encrypted
+;;	  main
+	  get-envs
 	  ))
 
 ;;working-dir determined by starting dir
@@ -48,44 +49,49 @@
 (define *gpg-key* "babweb@build-a-bot.biz")
 
 
-;;(define (get-envs)
-  ;; (let*  ((varlst (if (access?  "./env.txt" R_OK)
-  ;; 		      (let* ((p  (open-input-file  "./env.txt"))
-  ;; 			     (a (get-string-all p))
-  ;; 			     (b (base64-decode a)))
-  ;; 			(json-string->scm (utf8->string b)))
-  ;; 		      '(("tweet-length" . "0")("client-secret"  .  "null")
-  ;; 			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
-  ;; 			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null")))    ))
+;; (define (get-envs)
+;;   (let*  ((varlst (if (access?  "./env.txt" R_OK)
+;; 		      (let* ((p  (open-input-file  "./env.txt"))
+;; 			     (a (get-string-all p))
+;; 			     (b (base64-decode a)))
+;; 			(json-string->scm (utf8->string b)))
+;; 		      '(("tweet-length" . "0")("client-secret"  .  "null")
+;; 			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
+;; 			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null")))    ))
 
- (let*  ((varlst (if (access?  "./envs" R_OK)
-		     (let* ((out-file (get-rand-file-name "f" "txt"))
-			    (command  (string-append "gpg --output " out-file " --decrypt envs"))
-			    (_ (system command))
-			    (p  (open-input-file  out-file))
-			    (a (get-string-all p))
-			    (b (json-string->scm  a))
-			    (_ (delete-file out-file)))
-		       b)
-		      '(("tweet-length" . "0")("client-secret"  .  "null")("data-dir"  .  "null")
-			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
-			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null")
-			("redirecturi"  .  "null")("platform"  .  "null")("gpg-key"  .  "null"))
-		      )    ))    
-    (begin
-      (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
-      (set! *oauth-consumer-secret* (assoc-ref varlst "oauth-consumer-secret"))
-      (set! *bearer-token* (assoc-ref varlst "bearer-token"))
-      (set! *oauth-access-token* (assoc-ref varlst "oauth-access-token"))
-      (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
-      (set! *client-id* (assoc-ref varlst "client-id"))
-      (set! *client-secret* (assoc-ref varlst "client-secret"))
-      (set! *redirecturi* (assoc-ref varlst "redirecturi"))
-      (set! *platform* (assoc-ref varlst "platform"))
-      (set! *data-dir* (assoc-ref varlst "data-dir"))
-      (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
-			       (string->number (assoc-ref varlst "tweet-length"))
-			       #f))
+(define (get-envs dir)
+  ;;returns a list
+  (if (access?  (string-append dir "/envs") R_OK)
+      (let* (
+	     ;; (out-file (get-rand-file-name "f" "txt"))
+	     (command  (string-append "gpg --decrypt envs"))
+	     (js (call-command-with-output-to-string command)))
+	;; (p  (open-input-file  out-file))
+	;; (a (get-string-all p))
+	;; (b (json-string->scm  a))
+	;; (_ (delete-file out-file)))
+	(json-string->scm  js))
+      #f))
+  
+    ;; 		      '(("tweet-length" . "0")("client-secret"  .  "null")("data-dir"  .  "null")
+    ;; 			("client-id"  .  "null")("oauth-token-secret"  .  "null")("oauth-access-token"  .  "null")
+    ;; 			("bearer-token"  .  "null")("oauth-consumer-secret"  .  "null")("oauth-consumer-key"  .  "null")
+    ;; 			("redirecturi"  .  "null")("platform"  .  "null")("gpg-key"  .  "null"))
+    ;; 		      )    ))    
+    ;; (begin
+    ;;   (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
+    ;;   (set! *oauth-consumer-secret* (assoc-ref varlst "oauth-consumer-secret"))
+    ;;   (set! *bearer-token* (assoc-ref varlst "bearer-token"))
+    ;;   (set! *oauth-access-token* (assoc-ref varlst "oauth-access-token"))
+    ;;   (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
+    ;;   (set! *client-id* (assoc-ref varlst "client-id"))
+    ;;   (set! *client-secret* (assoc-ref varlst "client-secret"))
+    ;;   (set! *redirecturi* (assoc-ref varlst "redirecturi"))
+    ;;   (set! *platform* (assoc-ref varlst "platform"))
+    ;;   (set! *data-dir* (assoc-ref varlst "data-dir"))
+    ;;   (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
+    ;; 			       (string->number (assoc-ref varlst "tweet-length"))
+    ;; 			       #f))
 
       ;;   (set! *oauth-consumer-key* (get-environment-variable "CONSUMER_KEY"))
       ;; (set! *oauth-consumer-secret* (get-environment-variable "CONSUMER_SECRET"))
@@ -96,7 +102,7 @@
       ;; (set! *client-secret* (get-environment-variable "CLIENT_SECRET")))
       ;; (pretty-print (string-append "in env.scm: " *oauth-consumer-key*))
 
-    ))
+  ;;  ))
 
 
 ;;guix shell --manifest=manifest.scm -- guile -L /home/mbc/projects/ebbot  -e '(ebbot env)' -s /home/mbc/projects/ebbot/ebbot/env.scm env-clear.txt env.txt
@@ -115,14 +121,14 @@
 ;;     (put-string p2 bytes64)))
 
 ;;guile -L /home/mbc/projects/babweb -e '(ebbot env)' -s /home/mbc/projects/babweb/babweb/lib/env.scm env-clear-template.txt
-(define (main args)
-  (let* ((fin (cadr args))
-	 (p  (open-input-file fin))
-	 (command (string-append "gpg --output envs --encrypt --recipient " *gpg-key* " " fin))
-	 (_ (system command))
-	 )
-    (close-port p)
-    ))
+;; (define (main args)
+;;   (let* ((fin (cadr args))
+;; 	 (p  (open-input-file fin))
+;; 	 (command (string-append "gpg --output envs --encrypt --recipient " *gpg-key* " " fin))
+;; 	 (_ (system command))
+;; 	 )
+;;     (close-port p)
+;;     ))
 
 ;;with everything in the store, you must place a subdir ebbot with env.scm which then has
 ;;to be first in GUILE_LOAD_PATH ::   export GUILE_LOAD_PATH="/home/mbc/projects/mastodon/test${GUILE_LOAD_PATH:+:}$GUILE_LOAD_PATH"x

@@ -49,19 +49,48 @@
   (token_type response-token-type)
   (access_token response-token-access-token))
 
+
+;; (define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
+;; (define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
+;; (define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
+;; (define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
+;; (define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
+;; (define *client-id* (@@ (ebbot env) *client-id*))
+;; (define *client-secret* (@@ (ebbot env) *client-secret*))
+;; (define *data-dir* (@@ (ebbot env) *data-dir*))
+;; (define *tweet-length* (@@ (ebbot env) *tweet-length*))
+
+(define *oauth-consumer-key* #f)
+(define *oauth-consumer-secret*  #f)
+(define *bearer-token* #f)   ;;this does not change
+(define *oauth-access-token* #f) 
+(define *oauth-token-secret* #f)
+(define *client-id* #f)
+(define *client-secret* #f) 
+(define *platform* #f)
+(define *redirecturi* #f)
+(define *data-dir* #f)
+(define *tweet-length* #f) 
+(define *gpg-key* "babweb@build-a-bot.biz")
+
+
 (define oauth-response-token-record (make-response-token "bearer" *oauth-access-token* ))
 
-(define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
-(define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
-(define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
-(define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
-(define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
-(define *client-id* (@@ (ebbot env) *client-id*))
-(define *client-secret* (@@ (ebbot env) *client-secret*))
-
-(define *data-dir* (@@ (ebbot env) *data-dir*))
-(define *tweet-length* (@@ (ebbot env) *tweet-length*))
-
+(define (set-envs varlst)
+  (begin
+      (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
+      (set! *oauth-consumer-secret* (assoc-ref varlst "oauth-consumer-secret"))
+      (set! *bearer-token* (assoc-ref varlst "bearer-token"))
+      (set! *oauth-access-token* (assoc-ref varlst "oauth-access-token"))
+      (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
+      (set! *client-id* (assoc-ref varlst "client-id"))
+      (set! *client-secret* (assoc-ref varlst "client-secret"))
+      (set! *redirecturi* (assoc-ref varlst "redirecturi"))
+      (set! *platform* (assoc-ref varlst "platform"))
+;;      (set! *data-dir* (assoc-ref varlst "data-dir"))
+      (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
+			       (string->number (assoc-ref varlst "tweet-length"))
+			       #f))))
 
 ;#<<oauth1-response> token: "856105513800609792-ttQfcoxgrGJnwaLfjEdyagDjL9lfbTP" secret: "EfoSSaCHSnmfkhfU2r5oiU03cA6Kb6SLLAr7rxZO73Tfg" params: (("user_id" . "856105513800609792") ("screen_name" . "mbcladwell"))>
 
@@ -185,7 +214,7 @@
 	 )
     (begin
        (if (access?  (string-append datadir "/oauth1_access_token_envs") F_OK) (delete-file (string-append datadir "/oauth1_access_token_envs")))
-       (encrypt-alist lst2 (string-append datadir "/oauth1_access_token_envs")))))
+       (encrypt-alist lst2 (string-append datadir "/oauth1_access_token_envs") *gpg-key*))))
 
 (define (refresh-access-token refresh-token data-dir)
   (let* ((uri "https://api.twitter.com/2/oauth2/token")
@@ -202,14 +231,14 @@
 				     #:body #f)
 		     (utf8->string body)))
 	 (alst (json-string->scm body))
-;;	 (_ (pretty-print alst))
+	 (_ (pretty-print alst))
 	 (expires-in  (assoc-ref alst "expires_in"))
 	 (expired (get-expired expires-in))
 	 (lst2 (acons "expired" expired alst))
 	 )
      (begin
        (if (access?  (string-append data-dir "/oauth1_access_token_envs") F_OK) (delete-file (string-append data-dir "/oauth1_access_token_envs")))
-       (encrypt-alist lst2 (string-append data-dir "/oauth1_access_token_envs"))
+       (encrypt-alist lst2 (string-append data-dir "/oauth1_access_token_envs") *gpg-key*)
        (assoc-ref lst2 "access_token")
        )))
   
@@ -262,7 +291,7 @@
 	(_ (delete-file out-file))
 	(expired (get-expired expires-in))
 	(lst2 (acons "expired" expired lst)))
-    (encrypt-alist lst2 (string-append *data-dir* "/oauth1_access_token_envs"))))
+    (encrypt-alist lst2 (string-append *data-dir* "/oauth1_access_token_envs") *gpg-key*)))
 
 
 ;;must modify .twurlrc
@@ -324,23 +353,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot  -e '(ebbot twitter)' -s /home/mbc/projects/ebbot/ebbot/twitter.scm 
+;; guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot  -e '(ebbot twitter)' -s /home/mbc/projects/ebbot/ebbot/twitter.scm /home/mbc/projects/babdata/ellul
 
 (define (main args)
-  (let* ((counter (get-counter))
-	 (all-excerpts (get-all-excerpts-alist))
+  (let* (
+	 (_ (set-envs (get-envs (cadr args))))
+	 (_ (set! *data-dir* (cadr args)))
+	 (_ (pretty-print (string-append "*data-dir*: " *data-dir*)))
+	 (counter (get-counter *data-dir*))
+	 (all-excerpts (get-all-excerpts-alist *data-dir*))
 	 (max-id (assoc-ref (car all-excerpts) "id"))
 	 (new-counter (if (= counter max-id) 0 (+ counter 1)))
-         (entity (find-by-id all-excerpts new-counter))
-	 (_ (pretty-print *tweet-length*))
-	 (_ (pretty-print *data-dir*))
-	 
+         (entity (find-by-id all-excerpts new-counter))	 
 	 (tweets (chunk-a-tweet (assoc-ref entity "content") *tweet-length*))
-	 (hashtags (get-all-hashtags-string))
+	 (hashtags (get-all-hashtags-string *data-dir*))
 	 (media-directive (assoc-ref entity "image"))
-	 (image-file (if (string=? media-directive "none") #f (get-image-file-name media-directive)))
+	 (image-file (if (string=? media-directive "none") #f (get-image-file-name media-directive *data-dir*)))
 	 (media-id (if image-file  (twurl-get-media-id image-file) #f))
-	 (_ (set-counter new-counter)))
+	 (_ (set-counter new-counter *data-dir*)))
     (oauth2-post-tweet-recurse tweets media-id #f *data-dir* hashtags 0)))
 
 

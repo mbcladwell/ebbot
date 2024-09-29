@@ -40,23 +40,59 @@
 	   main
 	   ))
 
+(define-record-type <response-token>
+  (make-response-token token_type access_token)
+  response-token?
+  (token_type response-token-type)
+  (access_token response-token-access-token))
 
-(define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
-(define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
-(define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
-(define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
-(define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
-(define *client-id* (@@ (ebbot env) *client-id*))
-(define *client-secret* (@@ (ebbot env) *client-secret*))
+;; (define *oauth-consumer-key* (@@ (ebbot env) *oauth-consumer-key*))
+;; (define *oauth-consumer-secret* (@@ (ebbot env) *oauth-consumer-secret*))
+;; (define *bearer-token* (@@ (ebbot env) *bearer-token*))  ;;this does not change
+;; (define *oauth-access-token* (@@ (ebbot env) *oauth-access-token*))
+;; (define *oauth-token-secret* (@@ (ebbot env) *oauth-token-secret*))
+;; (define *client-id* (@@ (ebbot env) *client-id*))
+;; (define *client-secret* (@@ (ebbot env) *client-secret*))
 
-(define *data-dir* (@@ (ebbot env) *data-dir*))
-(define *tweet-length* (@@ (ebbot env) *tweet-length*))
+;; (define *data-dir* (@@ (ebbot env) *data-dir*))
+;; (define *tweet-length* (@@ (ebbot env) *tweet-length*))
 
+(define *oauth-consumer-key* #f)
+(define *oauth-consumer-secret*  #f)
+(define *bearer-token* #f)   ;;this does not change
+(define *oauth-access-token* #f) 
+(define *oauth-token-secret* #f)
+(define *client-id* #f)
+(define *client-secret* #f) 
+(define *platform* #f)
+(define *redirecturi* #f)
+(define *data-dir* #f)
+(define *tweet-length* #f) 
+(define *gpg-key* "babweb@build-a-bot.biz")
+
+
+(define oauth-response-token-record (make-response-token "bearer" *oauth-access-token* ))
+
+(define (set-envs varlst)
+  (begin
+      (set! *oauth-consumer-key* (assoc-ref varlst "oauth-consumer-key"))
+      (set! *oauth-consumer-secret* (assoc-ref varlst "oauth-consumer-secret"))
+      (set! *bearer-token* (assoc-ref varlst "bearer-token"))
+      (set! *oauth-access-token* (assoc-ref varlst "oauth-access-token"))
+      (set! *oauth-token-secret* (assoc-ref varlst "oauth-token-secret"))
+      (set! *client-id* (assoc-ref varlst "client-id"))
+      (set! *client-secret* (assoc-ref varlst "client-secret"))
+      (set! *redirecturi* (assoc-ref varlst "redirecturi"))
+      (set! *platform* (assoc-ref varlst "platform"))
+;;      (set! *data-dir* (assoc-ref varlst "data-dir"))
+      (set! *tweet-length* (if (assoc-ref varlst "tweet-length")			    
+			       (string->number (assoc-ref varlst "tweet-length"))
+			       #f))))
 
 
 
 ;;curl -v -H 'Authorization: Bearer dFe6j-65kVREIqyJs7RSmn23GeFBEU4_Qb2Nln_z_Lw' -X POST -H 'Content-Type: multipart/form-data' https://mastodon.social/api/v2/media --form file='@/home/mbc/projects/babdata/archive/fakenewshist.jpeg'
-(define (mast-post-image-curl i)
+(define (mast-post-image-curl i )
   (let*(
 	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
 	(image (string-append "file='@" i "'"))
@@ -171,56 +207,26 @@
 	    (mast-post-toot-curl-recurse  (cdr lst) new-reply-id #f counter hashtags)))))
 
 
-(define (mastodon-runner)
-(let* ( ;;(_ (get-envs))
-	  (counter (get-counter))
-	  (all-excerpts (get-all-excerpts-alist))
+
+;;guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm /home/mbc/projects/babdata/ellul
+
+(define (main args)
+  (let* ( ;;(_ (get-envs))
+	 (_ (set-envs (get-envs (cadr args))))
+	 (_ (set! *data-dir* (cadr args)))
+	 (_ (pretty-print (string-append "*data-dir*: " *data-dir*)))
+	  (counter (get-counter *data-dir*))
+	  (all-excerpts (get-all-excerpts-alist *data-dir*))
 	  (max-id (assoc-ref (car all-excerpts) "id"))
 	  (new-counter (if (= counter max-id) 0 (+ counter 1)))
           (entity (find-by-id all-excerpts new-counter))	 
 	  (tweets (chunk-a-tweet (assoc-ref entity "content") *tweet-length*))
-	  (hashtags (get-all-hashtags-string))
-
+	  (hashtags (get-all-hashtags-string *data-dir*))
 	  (media-directive (assoc-ref entity "image"))
-	  (image-file (if (string=? media-directive "none") #f (get-image-file-name media-directive)))
-	  (media-id (if image-file (mast-post-image-curl image-file) #f))
+	  (image-file (if (string=? media-directive "none") #f (get-image-file-name media-directive *data-dir*)))
+	  (media-id (if image-file (mast-post-image-curl image-file ) #f))
 	 ;; (_ (pretty-print media-id))
-	  (_ (set-counter new-counter)))
-    (mast-post-toot-curl-recurse tweets #f media-id 0 hashtags)
-	 )
-  )
+	  (_ (set-counter new-counter *data-dir*)))
+ (pretty-print    (mast-post-toot-curl-recurse tweets #f media-id 0 hashtags))
+))
 
-;;guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm
-
-(define (main args)
- (mastodon-runner))
-
-;;;;;
-;;unused
-;;;
-
-;; (define (mast-oauth2-get-access )
-;;   (let* (
-;; 	;; (oauth1-response (make-oauth1-response *oauth-access-token* *oauth-token-secret* '(("user_id" . "1516431938848006149") ("screen_name" . "eddiebbot")))) ;;these credentials do not change
-;; 	;; (credentials (make-oauth1-credentials *oauth-consumer-key* *oauth-consumer-secret*))
-;; 	;; (data (string-append "{\"text\": \"" text "\"}"))
-;;  	 (uri  "https://mastodon.social/oauth/token")
-;; 	 (tweet-request (make-oauth-request uri 'POST '()))
-;; 	 (dummy (oauth-request-add-params tweet-request `( 
-;; 	  						  (client_id . ,*oauth-consumer-key*)
-;; 							  (client_secret . ,(get-nonce 20 ""))
-;; 							  (redirect_uri . "urn:ietf:wg:oauth:2.0:oob")
-							
-;; 							   (grant_type . "authorization_code")
-;; 							   (code . ,*authorization-code*)
-;; 							   (scope . "write:statuses")
-;; 							  ; (Content-type . "application/json")
-;; 							  ; (json . ,data)
-;; 							   )))
-;; ;;	 (dummy (oauth1-request-sign tweet-request credentials oauth1-response #:signature oauth1-signature-hmac-sha1))
-;; ;;	 (dummy (oauth-request-add-param tweet-request 'content-type "application/json"))
-;; ;;	 (dummy (oauth-request-add-param tweet-request 'Authorization "Bearer"))
-;; ;;	 (dummy (oauth-request-add-param tweet-request 'scope "tweet.write"))
-	 
-;; 	 )
-;;     #f))

@@ -13,7 +13,7 @@
  #:use-module (rnrs bytevectors )
 ;; #:use-module (rnrs io ports #:select ())
  #:use-module (ice-9 textual-ports)
- #:use-module (ebbot env)
+;; #:use-module (ebbot env)
  #:use-module (ice-9 ftw);;scandir
  #:export (get-rand-file-name
 	   add-two-lists
@@ -64,18 +64,18 @@
 (define (get-rand-file-name pre suff)
   (string-append pre "-" (number->string (random 10000000000000000000000)) "." suff))
 
-(define (get-counter)
+(define (get-counter dir)
   ;;counter is the last tweeted id
   ;;start with (+ counter 1) for this session
   (let* (
-	 (p  (open-input-file (string-append *data-dir* "/last-posted.json")))
+	 (p  (open-input-file (string-append dir "/last-posted.json")))
 	 (a (json-string->scm (get-string-all p)))
 	 (dummy (close-port p))
 	 (b (assoc-ref a "last-posted-id")))
     b))
 
-(define (set-counter x)
-(let* ((p  (open-output-file (string-append *data-dir* "/last-posted.json")))
+(define (set-counter x dir)
+(let* ((p  (open-output-file (string-append dir "/last-posted.json")))
 	 (a (scm->json-string `(("last-posted-id" . ,x))))
 	 (dummy (put-string p a)))
   (close-port p)))
@@ -134,8 +134,8 @@
 	)
   (get-tweet-chunks text '() size-mod ntweets 1) ))
 
-(define (get-all-excerpts-alist)
-  (let* ((p  (open-input-file (string-append *data-dir* "/db.json")))
+(define (get-all-excerpts-alist dir)
+  (let* ((p  (open-input-file (string-append dir "/db.json")))
 	 (a (vector->list (json-string->scm (get-string-all p)))))	
      a))
 
@@ -148,9 +148,9 @@
 	(set! newlst (cons  (string-append "#" (car lst)) newlst))
 	(add-hash-recurse (cdr lst) newlst))))
 
-(define (get-all-hashtags-string)
+(define (get-all-hashtags-string dir)
   ;;hashtags stored with #
-  (let* ((p  (open-input-file (string-append *data-dir* "/hashtags.json")))
+  (let* ((p  (open-input-file (string-append dir "/hashtags.json")))
 	 (a (vector->list (assoc-ref (json-string->scm (get-string-all p)) "hashtags"))))	
      (string-join (add-hash-recurse a '()))))
 
@@ -171,10 +171,10 @@
    (vector-ref all-files (random (vector-length all-files) (seed->random-state (number->string (time-nanosecond (current-time)))))) ) )
 
 
-(define (get-image-file-name directive)
+(define (get-image-file-name directive dir)
   (cond ((string=? directive "none") (#f))
-	((string=? directive "random")(string-append *data-dir* "/random/" (get-random-image (string-append *data-dir* "/random/"))) )	
-	(else (string-append *data-dir* "/specific/" directive))
+	((string=? directive "random")(string-append dir "/random/" (get-random-image (string-append dir "/random/"))) )	
+	(else (string-append dir "/specific/" directive))
      ))
 
 (define (get-expired expires-in)
@@ -182,11 +182,11 @@
   (+ (time-second (current-time))   expires-in))
 
 
-(define (encrypt-alist alist fname)
+(define (encrypt-alist alist fname gpg-key)
   (let* ((json-string (scm->json-string alist))
 	 (out-file (get-rand-file-name "f" "txt"))
 	 (p  (open-output-file out-file))
-	 (command (string-append "gpg --output " fname " --encrypt --recipient " *gpg-key* " " out-file)))
+	 (command (string-append "gpg --output " fname " --encrypt --recipient " gpg-key " " out-file)))
   (begin
     (put-string p json-string)
     (force-output p)
