@@ -64,7 +64,7 @@
   (if (access?  (string-append dir "/envs") R_OK)
       (let* (
 	     ;; (out-file (get-rand-file-name "f" "txt"))
-	     (command  (string-append "gpg --decrypt envs"))
+	     (command  (string-append "cd dir && gpg --decrypt envs"))
 	     (js (call-command-with-output-to-string command)))
 	;; (p  (open-input-file  out-file))
 	;; (a (get-string-all p))
