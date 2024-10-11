@@ -31,7 +31,8 @@
 	   decrypt-alist
 	   envs-report
 	   lst-to-query-string
-	   call-command-with-output-to-string))
+	   call-command-with-output-to-string
+	   update-mcron-jobs))
 
 
 (define (add-two-lists lst base id)
@@ -237,3 +238,24 @@
     (values
      result
      (read-delimited "" (car out-cons)))))
+
+(define (update-mcron-jobs exe dir freq)
+  ;;exe: the bash script to use
+  ;;dir: the target directory containing envs
+  ;;freq on of "hourly" "every-six" or "daily"
+  (let* (
+	;; (exe "masttoot.sh")
+	;; (dir "~/babdata/bernays")
+	 (log ">~/mcronlog.log 2>&1")
+	;; (freq "hourly")
+	 (current-hour  (date-hour (current-date)))
+	 (next4hrs (sort-list (map (lambda (x)(remainder (+ current-hour x) 24)) '(1 6 12 18)) <))
+	 (job-freq (cond
+        	    ((string=? freq "hourly") (format #f "next-minute-from (next-hour) '(~a)" (number->string (random 59))))
+        	    ((string=? freq "every-six") (format #f "next-minute-from (next-hour '~a) '(~a)" next4hrs (number->string (random 59))))
+        	    ((string=? freq "daily") (format #f "next-hour '(~a)" current-hour))))
+	 (entry (format #f "(job '(~a) \"~a ~a ~a\")" job-freq exe dir log ))
+	 (port (open-file "~/.config/cron/job.guile" "a")))
+    (begin
+      (display s port)
+      (close-port port))))

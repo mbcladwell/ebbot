@@ -211,7 +211,7 @@
 ;;guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm /home/mbc/projects/babdata/ellul
 
 (define (main args)
-  (let* ( ;;(_ (get-envs))
+  (let* ((_ (get-envs))
 	 (_ (set-envs (get-envs (cadr args))))
 	 (_ (set! *data-dir* (cadr args)))
 	 (_ (pretty-print (string-append "*data-dir*: " *data-dir*)))
