@@ -15,7 +15,6 @@
   #:use-module (ice-9 pretty-print)
   #:use-module (json)
   #:use-module (ice-9 textual-ports)
-  #:use-module (ebbot html)
   #:export (main))
 
 ;;input: a text file with quotes that are delimitted by <CR><LF>
