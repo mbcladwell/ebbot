@@ -67,7 +67,7 @@
 	     (command  (string-append "cd dir && gpg --output out-file --decrypt envs"))
 	     ;; (js (call-command-with-output-to-string command)))
 	     (_ (system command))
-	     (p  (open-input-file  (string-append dir "/" out-file))
+	     (p  (open-input-file  (string-append dir "/" out-file)))
 	     (a (get-string-all p))
 	     ;; (b (json-string->scm  a))
 	    ;; (_ (delete-file out-file))
