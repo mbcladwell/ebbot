@@ -70,7 +70,7 @@
 	     (p  (open-input-file  (string-append dir "/" out-file)))
 	     (a (get-string-all p))
 	     ;; (b (json-string->scm  a))
-	    ;; (_ (delete-file out-file))
+	     (_ (delete-file (string-append dir "/" out-file)))
 	     )
 	(json-string->scm  a))
       #f))
