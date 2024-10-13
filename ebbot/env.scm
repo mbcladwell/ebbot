@@ -63,16 +63,10 @@
   ;;returns a list
   (if (access?  (string-append dir "/envs") R_OK)
       (let* (
-	     (out-file (get-rand-file-name "f" "txt"))
-	     (command  (string-append "cd " dir " && gpg -o " (string-append dir "/" out-file) " --decrypt envs"))
-	     ;; (js (call-command-with-output-to-string command)))
-	     (_ (system command))
-	     (p  (open-input-file  (string-append dir "/" out-file)))
-	     (a (get-string-all p))
-	     ;; (b (json-string->scm  a))
-	     (_ (delete-file (string-append dir "/" out-file)))
+	     (command  (string-append "gpg --decrypt " dir "/envs"))
+	     (js (call-command-with-output-to-string command))
 	     )
-	(json-string->scm  a))
+	(json-string->scm  js))
       #f))
   
     ;; 		      '(("tweet-length" . "0")("client-secret"  .  "null")("data-dir"  .  "null")
