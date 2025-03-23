@@ -36,12 +36,15 @@
 
 (define (clean-chars s)
   ;;remove offensive characters
-  (let* ((out (string-replace-substring s "'" "%27"))
+  (let* (
+	 (out (string-replace-substring s "'" "%27"))
 	 (out (string-replace-substring out "’" "%27"))
 	 (out (string-replace-substring out "\"" "%22"))
 	 (out (string-replace-substring out "“" "%22"))
 	 (out (string-replace-substring out "”" "%22"))
 	 (out (string-replace-substring out "…" "..."))
+	 (out (string-replace-substring out ";" "%3B"))
+	 (out (string-replace-substring out "—" "-"))
 
 	 )
     out))
@@ -85,6 +88,8 @@
 
 ;;/gnu/store/pm4swxzzcz77li6xgsf9xl2rskk4228r-guile-next-3.0.9-0.3b76a30/bin/guile -L /home/mbc/projects/babweb -e '(ebbot format)' -s /home/mbc/projects/babweb/babweb/lib/format.scm . destination.txt
 
+;; guile -L /home/mbc/projects/ebbot -e '(ebbot format)' -s /home/mbc/projects/ebbot/ebbot/format.scm . destination_bluff.txt
+
 (define (main args)
   ;; args: '( "working-dir" "new-excerpts-file-name"  )
   (let* ((start-time (current-time time-monotonic))
@@ -104,3 +109,16 @@
    ;; (pretty-print (string-append "Elapsed time: " (number->string  elapsed-time) " minutes." ))
    ;; #f
     ))
+
+
+;; from desktop
+;; scp -ri labsolns.pem /home/mbc/projects/babdata/bernays admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata
+;; scp -ri labsolns.pem /home/mbc/projects/babdata/kazcin admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata
+;; scp -ri labsolns.pem /home/mbc/projects/babdata/quotes admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata
+
+;; scp -i labsolns.pem /home/mbc/projects/babdata/ellul/db.json admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata/ellul/
+;; scp -i labsolns.pem /home/mbc/projects/babdata/ellul/hashtags.json admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata/ellul/
+;; scp -i labsolns.pem /home/mbc/projects/babdata/ellul/last-posted.json admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata/ellul/
+;; scp -i labsolns.pem /home/mbc/projects/babdata/ellul/envs admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata/ellul/
+;; scp -i labsolns.pem /home/mbc/projects/babdata/ellul/random/*.* admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata/ellul/random/
+;; scp -i labsolns.pem /home/mbc/projects/babdata/ellul/specific/*.* admin@ec2-3-145-150-142.us-east-2.compute.amazonaws.com:./babdata/ellul/specific/

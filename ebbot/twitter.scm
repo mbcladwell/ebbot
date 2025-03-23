@@ -74,7 +74,7 @@
 (define *gpg-key* "babweb@build-a-bot.biz")
 
 
-(define oauth-response-token-record (make-response-token "bearer" *oauth-access-token* ))
+;;(define oauth-response-token-record (make-response-token "bearer" *oauth-access-token* ))
 
 (define (set-envs varlst)
   (begin
@@ -294,8 +294,8 @@
     (encrypt-alist lst2 (string-append *data-dir* "/oauth1_access_token_envs") *gpg-key*)))
 
 
-;;must modify .twurlrc
 (define (twurl-get-media-id pic-file-name)
+  ;;must modify .twurlrc
   (let* ((command (string-append "twurl -X POST -H upload.twitter.com /1.1/media/upload.json?media_category=TWEET_IMAGE -f " pic-file-name " -F media"))
 	 (js (call-command-with-output-to-string command))
 	 (lst  (json-string->scm js)))
@@ -333,7 +333,8 @@
       (begin
 	(oauth2-post-tweet (string-append (car lst) " " hashtags) #f reply-id data-dir ))
       (if (eqv? counter 0)
-	  (let* ((_ (pretty-print (string-append "counter is 0 i.e. the first tweet " )))
+	  (let* (
+		 ;;(_ (pretty-print (string-append "counter is 0 i.e. the first tweet " )))
 		 (body (receive (response body)	  
 			   (oauth2-post-tweet (car lst) media-id reply-id data-dir)
 			 body))

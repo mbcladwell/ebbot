@@ -19,7 +19,8 @@
  #:use-module (ice-9 pretty-print)
  #:use-module (json)
  #:use-module (rnrs bytevectors)
- #:use-module (ice-9 textual-ports)
+ #:use-module (rnrs io ports)
+;; #:use-module (ice-9 textual-ports)
  #:use-module (ebbot image)
  #:use-module (ebbot utilities)
  #:use-module (oauth oauth1)
@@ -35,7 +36,7 @@
  
  #:export (
 	   mast-post-toot-curl-recurse
-	   mast-post-image-curl
+	   mast-post-image
 	   mastodon-runner
 	   main
 	   ))
@@ -92,47 +93,25 @@
 
 
 ;;curl -v -H 'Authorization: Bearer dFe6j-65kVREIqyJs7RSmn23GeFBEU4_Qb2Nln_z_Lw' -X POST -H 'Content-Type: multipart/form-data' https://mastodon.social/api/v2/media --form file='@/home/mbc/projects/babdata/archive/fakenewshist.jpeg'
-(define (mast-post-image-curl i )
-  (let*(
-	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
-	(image (string-append "file='@" i "'"))
-	(out-file (get-rand-file-name "f" "txt"))
-;;	(_ (pretty-print (string-append " *wd* in post-image-curl: " *working-dir*)))
-;;	(_ (pretty-print (string-append "getcwd in post-image-curl: " (getcwd))))
+;; (define (mast-post-image-curl i )
+;;   (let*(
+;; 	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
+;; 	(image (string-append "file='@" i "'"))
+;; 	(out-file (get-rand-file-name "f" "txt"))
+;; ;;	(_ (pretty-print (string-append " *wd* in post-image-curl: " *working-dir*)))
+;; ;;	(_ (pretty-print (string-append "getcwd in post-image-curl: " (getcwd))))
 	
-	(command (string-append "curl -o " out-file " -X POST -H " bearer " -H 'Content-Type: multipart/form-data' https://mastodon.social/api/v2/media --form " image))
-	(_ (system command))
-	(_ (sleep 3))
-	(p  (open-input-file out-file))
-	(lst  (json-string->scm (get-string-all p)))
-	(id (assoc-ref lst "id"))
-	(_ (delete-file out-file))
-      )
-  id  ))
+;; 	(command (string-append "curl -o " out-file " -X POST -H " bearer " -H 'Content-Type: multipart/form-data' https://mastodon.social/api/v2/media --form " image))
+;; 	(_ (system command))
+;; 	(_ (sleep 3))
+;; 	(p  (open-input-file out-file))
+;; 	(lst  (json-string->scm (get-string-all p)))
+;; 	(id (assoc-ref lst "id"))
+;; 	(_ (delete-file out-file))
+;;       )
+;;   id  ))
 
 
-;; (define (mast-post-toot-curl t i)
-;;   (let*((media-id (mast-post-image-curl i))
-;; 	(media (string-append "' -F 'media_ids[]=" media-id "'"))
-;; 	(pref "curl https://mastodon.social/api/v1/statuses -H 'Authorization: Bearer dFe6j-65kVREIqyJs7RSmn23GeFBEU4_Qb2Nln_z_Lw' -F 'status=")
-;; 	(suff "'")
-;; 	(command (string-append pref t media))
-;; 	(_ (pretty-print command))
-;; 	)
-;;   (system command)  )
-;;   )
-
-
-;; (define (mast-post-toot-curl t i)
-;;   (let*((media-id (mast-post-image-curl i))
-;; 	(status (string-append " -F 'status=" t "'"))
-;; 	(pref "curl https://mastodon.social/api/v1/statuses -H 'Authorization: Bearer dFe6j-65kVREIqyJs7RSmn23GeFBEU4_Qb2Nln_z_Lw' -F 'media_ids[]=")
-;; 	(suff "'")
-;; 	(command (string-append pref media-id status))
-;; 	(_ (pretty-print command))
-;; 	)
-;;   (system command)  )
-;;   )
 
 ;; curl -X POST \
 ;; 	-F 'client_id=your_client_id_here' \
@@ -142,6 +121,50 @@
 ;; 	-F 'code=user_authzcode_here' \
 ;; 	-F 'scope=read write push' \
 ;; 	https://mastodon.example/oauth/token
+
+
+(define (mast-post-image image-path )
+  (let*(
+	(uri "https://mastodon.social/api/v2/media")	
+	(image-data (call-with-input-file image-path
+		      (lambda (port)
+			(get-bytevector-all port))))
+	(base-name (basename image-path))
+	(file-extension (get-file-extension image-path))
+	(boundary "----GuileMastodonBoundary12345")
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;jpg jpeg png           webp?
+	(payload (call-with-bytevector-output-port
+	       (lambda (port)
+		 ;; Write the opening boundary and headers as text
+		 (display (string-append "--" boundary "\r\n") port)
+		 (display (string-append "Content-Disposition: form-data; name=\"file\"; filename=" base-name "\r\n") port)
+		 (display (string-append "Content-Type: image/" file-extension "\r\n\r\n") port)
+		 ;; Write the raw binary image data
+		 (put-bytevector port image-data)
+		 ;; Write the closing boundary
+		 (display (string-append "\r\n--" boundary "--\r\n") port))))
+	;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; (body
+	;;  (string->utf8
+	;;   (string-append
+	;;    "--" boundary "\r\n"
+	;;    "Content-Disposition: form-data; name=\"file\"; filename=" base-name "\r\n"
+	;;    "Content-Type: image/" file-extension "\r\n\r\n"
+	;;    (utf8->string image-data) ;; Convert bytevector to string (binary safe in practice here)
+	;;    "\r\n"
+	;;    "--" boundary "--\r\n")))
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	(resp (receive (response body)
+      		  (http-request uri 
+				#:method 'POST
+				#:headers `((Authorization . ,(string-append "Bearer " *bearer-token*))
+					    (Content-Type . ,(string-append "multipart/form-data; boundary=" boundary))
+					    )
+				#:body payload)
+		(utf8->string body)))
+	(lst (json-string->scm resp)))
+     (assoc-ref lst "id")))
+
 
 
 (define (mastodon-get-access-post)
@@ -159,39 +182,65 @@
 
   )
 
-(define (mast-post-toot-curl t i r)
+;; (define (mast-post-toot-curl t i r)
+;;   ;;t: text
+;;   ;;i: media-id or #f
+;;   ;;r: reply-id or #f
+;;   (let*(;;(media-id (mast-post-image-curl i))
+;; 	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
+;; 	(media (if i (string-append "' --data-binary 'media_ids[]=" i ) ""))
+;; 	(reply (if r (string-append "' --data-binary 'in_reply_to_id=" r ) ""))
+;; 	(suffix "'")
+;; 	(out-file (get-rand-file-name "f" "txt"))
+;; 	(command (string-append "curl -o " out-file " https://mastodon.social/api/v1/statuses -H " bearer " --data-binary 'status=" t media reply suffix))
+;; 	(_ (system command))
+;; 	(_ (sleep 3))
+;; 	(p  (open-input-file out-file))
+;; 	(lst  (json-string->scm (get-string-all p)))
+;; 	;;      	(in (open-pipe*  OPEN_READ "curl" "-v" "-o" out-file "-H" bearer "-X" "POST" "-H" "'Content-Type: multipart/form-data'" "https://mastodon.social/api/v2/media" "--form" image))
+;; 	;;(_ (pretty-print lst))
+;; 	(id (assoc-ref lst "id"))
+;; 	(_ (delete-file out-file))
+;; ;;	(_ (pretty-print (string-append "post id: " id)))
+;; 	)
+;;   id  ))
+
+
+;;(define (test-bearer-syntax text-in image-path )
+(define (mast-post-toot t i r)
   ;;t: text
   ;;i: media-id or #f
   ;;r: reply-id or #f
-  (let*(;;(media-id (mast-post-image-curl i))
-	(bearer (string-append "'Authorization: Bearer " *bearer-token* "'"))
-	(media (if i (string-append "' --data-binary 'media_ids[]=" i ) ""))
-	(reply (if r (string-append "' --data-binary 'in_reply_to_id=" r ) ""))
-	(suffix "'")
-	(out-file (get-rand-file-name "f" "txt"))
-	(command (string-append "curl -o " out-file " https://mastodon.social/api/v1/statuses -H " bearer " --data-binary 'status=" t media reply suffix))
-	(_ (system command))
-	(_ (sleep 3))
-	(p  (open-input-file out-file))
-	(lst  (json-string->scm (get-string-all p)))
-	;;      	(in (open-pipe*  OPEN_READ "curl" "-v" "-o" out-file "-H" bearer "-X" "POST" "-H" "'Content-Type: multipart/form-data'" "https://mastodon.social/api/v2/media" "--form" image))
-	;;(_ (pretty-print lst))
-	(id (assoc-ref lst "id"))
-	(_ (delete-file out-file))
-;;	(_ (pretty-print (string-append "post id: " id)))
-	)
-  id  ))
+  (let* ((uri "https://mastodon.social/api/v1/statuses")
+	(media (if i (string-append "&media_ids[]=" (uri-encode i)) ""))
+ 	(reply (if r (string-append "&in_reply_to_id=" (uri-encode r)) ""))
+	(payload (string->utf8 (string-append "status="  t media reply)))
+	(resp (receive (response body)
+      		  (http-request uri 
+				#:method 'POST
+				#:headers `((Authorization . ,(string-append "Bearer " *bearer-token*))
+					    ;;(authorization . ,(parse-header 'authorization *bearer-token*))
+					    (Content-Type . "application/x-www-form-urlencoded")
+					    )
+				#:body payload
+				)
+		(utf8->string body)))
+	(lst (json-string->scm resp)))    
+    (assoc-ref lst "id")))
 
-(define (mast-post-toot-curl-recurse lst reply-id media-id counter hashtags)
+
+
+
+(define (mast-post-toot-recurse lst reply-id media-id counter hashtags)
   ;;list of tweets to post
   ;;reply-id initially ""
   ;;counter initially 0; counter is needed to identify reply-id in first round and use media-id if exists
   ;;hashtags: "#uniparty #fakenews #misinformation #disinformation #propaganda"
   (if (null? (cdr lst))
-	(mast-post-toot-curl (string-append (car lst) " " hashtags)  media-id reply-id);; last or only toot
+	(mast-post-toot (string-append (car lst) " " hashtags)  media-id reply-id);; last or only toot
       (if (eqv? counter 0) ;;the first toot with image and hashtags
 	  (let* (;;(toot (string-append (car lst) " " hashtags))
-		 (new-reply-id (mast-post-toot-curl (car lst) media-id reply-id))
+		 (new-reply-id (mast-post-toot (car lst) media-id reply-id))
 		 (_ (set! counter (+ counter 1)))
 		 )
 	      ;; (pretty-print (cdr lst))
@@ -200,15 +249,15 @@
 	      ;; (pretty-print media-id)
 	      ;; (pretty-print counter)
 
-	    (mast-post-toot-curl-recurse  (cdr lst)  new-reply-id #f counter hashtags)		
+	    (mast-post-toot-recurse  (cdr lst)  new-reply-id #f counter hashtags)		
 	    )
-	  (let* ((new-reply-id (mast-post-toot-curl (car lst) #f reply-id))
+	  (let* ((new-reply-id (mast-post-toot (car lst) #f reply-id))
 		 (_ (set! counter (+ counter 1))))
-	    (mast-post-toot-curl-recurse  (cdr lst) new-reply-id #f counter hashtags)))))
+	    (mast-post-toot-recurse  (cdr lst) new-reply-id #f counter hashtags)))))
 
 
 
-;;guix shell -m manifest.scm -- guile -L . -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm /home/mbc/projects/babdata/ellul
+;;guix shell -m ./manifest.scm -- guile -L . -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm /home/mbc/projects/babdata/ellul
 
 (define (main args)
   (let* (;;(_ (get-envs))
@@ -224,9 +273,9 @@
 	  (hashtags (get-all-hashtags-string *data-dir*))
 	  (media-directive (assoc-ref entity "image"))
 	  (image-file (if (string=? media-directive "none") #f (get-image-file-name media-directive *data-dir*)))
-	  (media-id (if image-file (mast-post-image-curl image-file ) #f))
+	  (media-id (if image-file (mast-post-image image-file ) #f))
 	 ;; (_ (pretty-print media-id))
 	  (_ (set-counter new-counter *data-dir*)))
- (pretty-print    (mast-post-toot-curl-recurse tweets #f media-id 0 hashtags))
+    (mast-post-toot-recurse tweets #f media-id 0 hashtags)
 ))
 

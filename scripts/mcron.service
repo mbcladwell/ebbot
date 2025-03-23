@@ -1,0 +1,14 @@
+[Unit]
+Description=Regular background program processing daemon
+Documentation=man:mcron(8)
+After=remote-fs.target nss-user-lookup.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mcron /home/admin/.config/cron/job.guile
+KillMode=process
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

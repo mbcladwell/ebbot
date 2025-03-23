@@ -22,6 +22,7 @@
 	   get-counter
 	   set-counter
 	   find-by-id
+	   get-file-extension
 	   get-all-excerpts-alist
 	   get-all-hashtags-string
 	   get-nonce
@@ -81,6 +82,9 @@
 	 (a (scm->json-string `(("last-posted-id" . ,x))))
 	 (dummy (put-string p a)))
   (close-port p)))
+
+(define (get-file-extension f)
+ (substring f (+ (string-rindex f #\.) 1) (string-length f)))
 
 (define (my-last lst)
   (if (null? (cdr lst))
