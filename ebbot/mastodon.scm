@@ -258,6 +258,8 @@
 
 
 ;;guix shell -m ./manifest.scm -- guile -L . -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm /home/mbc/projects/babdata/ellul
+;;guile -L /home/mbc/projects/ebbot -e '(ebbot mastodon)' -s /home/mbc/projects/ebbot/ebbot/mastodon.scm /home/mbc/projects/babdata/ellul
+
 
 (define (main args)
   (let* (;;(_ (get-envs))
